@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaUpload, isVideoMedia } from "@/components/admin/MediaUpload";
 import { Input, Modal } from "./admin.services";
 
 export const Route = createFileRoute("/admin/masters")({
@@ -52,9 +53,11 @@ function MastersAdmin() {
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((m) => (
-          <div key={m.id} className="bg-card border border-divider p-6">
+          <div key={m.id} className="bg-card border border-divider p-6 transition-all duration-300 hover:-translate-y-1 hover:border-gold/50">
             <div className="flex gap-4">
-              {m.photo_url ? <img src={m.photo_url} alt="" className="w-20 h-20 object-cover" /> : <div className="w-20 h-20 bg-black border border-divider" />}
+              {m.photo_url ? (
+                isVideoMedia(m.photo_url) ? <video src={m.photo_url} className="w-20 h-20 object-cover" muted playsInline /> : <img src={m.photo_url} alt="" className="w-20 h-20 object-cover" />
+              ) : <div className="w-20 h-20 bg-black border border-divider" />}
               <div className="min-w-0 flex-1">
                 <div className="font-serif text-xl truncate">{m.name}</div>
                 <div className="text-sm text-foreground/60">{m.speciality}</div>
@@ -77,7 +80,7 @@ function MastersAdmin() {
             <Input label="ИМЯ" value={editing.name || ""} onChange={v => setEditing({ ...editing, name: v })} />
             <Input label="СПЕЦИАЛИЗАЦИЯ" value={editing.speciality || ""} onChange={v => setEditing({ ...editing, speciality: v })} />
             <Input label="ОПЫТ" value={editing.experience || ""} onChange={v => setEditing({ ...editing, experience: v })} />
-            <Input label="URL ФОТО" value={editing.photo_url || ""} onChange={v => setEditing({ ...editing, photo_url: v })} />
+            <MediaUpload label="ФОТО ИЛИ ВИДЕО" value={editing.photo_url || ""} onChange={v => setEditing({ ...editing, photo_url: v })} />
           </div>
           <div className="mt-8 flex justify-end gap-3">
             <button onClick={() => setEditing(null)} className="px-6 py-2 font-display text-xs tracking-[0.25em] text-muted-foreground">ОТМЕНА</button>
