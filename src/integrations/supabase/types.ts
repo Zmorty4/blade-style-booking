@@ -14,7 +14,177 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_date: string
+          booking_time: string
+          client_name: string
+          comment: string | null
+          created_at: string
+          id: string
+          master_id: string | null
+          phone: string
+          service_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          booking_date: string
+          booking_time: string
+          client_name: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          master_id?: string | null
+          phone: string
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          booking_date?: string
+          booking_time?: string
+          client_name?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          master_id?: string | null
+          phone?: string
+          service_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_master_id_fkey"
+            columns: ["master_id"]
+            isOneToOne: false
+            referencedRelation: "masters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      masters: {
+        Row: {
+          created_at: string
+          experience: string | null
+          id: string
+          is_active: boolean
+          name: string
+          photo_url: string | null
+          speciality: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          experience?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          photo_url?: string | null
+          speciality?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          experience?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          photo_url?: string | null
+          speciality?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          price: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shop_settings: {
+        Row: {
+          address: string | null
+          created_at: string
+          hero_image_url: string | null
+          id: string
+          instagram: string | null
+          logo_url: string | null
+          phone: string | null
+          shop_name: string | null
+          tagline: string | null
+          updated_at: string
+          working_hours: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          hero_image_url?: string | null
+          id?: string
+          instagram?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          shop_name?: string | null
+          tagline?: string | null
+          updated_at?: string
+          working_hours?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          hero_image_url?: string | null
+          id?: string
+          instagram?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          shop_name?: string | null
+          tagline?: string | null
+          updated_at?: string
+          working_hours?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
