@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaUpload } from "@/components/admin/MediaUpload";
 import { Input } from "./admin.services";
 
 export const Route = createFileRoute("/admin/settings")({
@@ -53,8 +54,8 @@ function SettingsAdmin() {
         </div>
         <Input label="АДРЕС" value={form.address} onChange={upd("address")} />
         <Input label="ЧАСЫ РАБОТЫ" value={form.working_hours} onChange={upd("working_hours")} />
-        <Input label="URL HERO-ФОТО" value={form.hero_image_url} onChange={upd("hero_image_url")} />
-        <Input label="URL ЛОГОТИПА" value={form.logo_url} onChange={upd("logo_url")} />
+        <MediaUpload label="HERO-ФОТО ИЛИ ВИДЕО" value={form.hero_image_url} onChange={upd("hero_image_url")} />
+        <MediaUpload label="ЛОГОТИП" value={form.logo_url} onChange={upd("logo_url")} accept="image/*" />
         <div className="flex items-center gap-4 pt-4">
           <button onClick={save} disabled={loading} className="border border-gold bg-gold text-black px-8 py-3 font-display text-xs tracking-[0.25em] hover:bg-gold-light disabled:opacity-50 flex items-center gap-3">
             {loading && <span className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />}
