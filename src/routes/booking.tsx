@@ -16,8 +16,24 @@ export const Route = createFileRoute("/booking")({
 
 type Service = { id: string; name: string; price: number; duration: number; image_url: string | null };
 type Master = { id: string; name: string; speciality: string | null; photo_url: string | null };
+type BookingSlot = { booking_date: string; booking_time: string; master_id: string | null };
 
 const ANY_MASTER: Master = { id: "any", name: "Любой мастер", speciality: "Первый освободившийся", photo_url: null };
+const SLOTS = Array.from({ length: 20 }, (_, i) => {
+  const hour = 10 + Math.floor(i / 2);
+  const minute = i % 2 === 0 ? "00" : "30";
+  return `${String(hour).padStart(2, "0")}:${minute}`;
+});
+
+function dateKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function monthBounds(month: Date) {
+  const start = new Date(month.getFullYear(), month.getMonth(), 1);
+  const end = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+  return { start: dateKey(start), end: dateKey(end) };
+}
 
 function BookingPage() {
   const search = Route.useSearch();
@@ -25,7 +41,8 @@ function BookingPage() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
   const [masters, setMasters] = useState<Master[]>([]);
-  const [busy, setBusy] = useState<{ date: string; time: string }[]>([]);
+  const [month, setMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
+  const [monthBookings, setMonthBookings] = useState<BookingSlot[]>([]);
 
   const [service, setService] = useState<Service | null>(null);
   const [master, setMaster] = useState<Master | null>(null);
@@ -38,6 +55,7 @@ function BookingPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    (supabase as any).rpc("cleanup_past_bookings").catch(() => {});
     (async () => {
       const [s, m] = await Promise.all([
         supabase.from("services").select("id,name,price,duration,image_url").eq("is_active", true).order("sort_order"),
@@ -55,15 +73,52 @@ function BookingPage() {
   }, [search.service]);
 
   useEffect(() => {
-    if (!date) return;
-    const iso = date.toISOString().slice(0, 10);
+    const { start, end } = monthBounds(month);
     (async () => {
-      let q = supabase.from("bookings").select("booking_date, booking_time, master_id").eq("booking_date", iso).neq("status", "cancelled");
+      let q = supabase
+        .from("bookings")
+        .select("booking_date, booking_time, master_id")
+        .gte("booking_date", start)
+        .lte("booking_date", end)
+        .neq("status", "cancelled");
       if (master && master.id !== "any") q = q.eq("master_id", master.id);
       const { data } = await q;
-      if (data) setBusy(data.map((b: any) => ({ date: b.booking_date, time: (b.booking_time as string).slice(0,5) })));
+      setMonthBookings((data || []) as BookingSlot[]);
     })();
-  }, [date, master]);
+  }, [month, master]);
+
+  const activeMasterCount = Math.max(masters.length - 1, 1);
+
+  const unavailableDates = useMemo(() => {
+    const byDate = new Map<string, Map<string, number>>();
+    monthBookings.forEach((b) => {
+      const timeKey = (b.booking_time || "").slice(0, 5);
+      if (!byDate.has(b.booking_date)) byDate.set(b.booking_date, new Map());
+      const times = byDate.get(b.booking_date)!;
+      times.set(timeKey, (times.get(timeKey) || 0) + 1);
+    });
+
+    return Array.from(byDate.entries())
+      .filter(([, times]) => SLOTS.every((slot) => (times.get(slot) || 0) >= (master?.id === "any" ? activeMasterCount : 1)))
+      .map(([day]) => day);
+  }, [activeMasterCount, master?.id, monthBookings]);
+
+  const busyTimes = useMemo(() => {
+    if (!date) return [];
+    const selectedDay = dateKey(date);
+    const counts = new Map<string, number>();
+    monthBookings
+      .filter((b) => b.booking_date === selectedDay)
+      .forEach((b) => {
+        const timeKey = (b.booking_time || "").slice(0, 5);
+        counts.set(timeKey, (counts.get(timeKey) || 0) + 1);
+      });
+    return SLOTS.filter((slot) => (counts.get(slot) || 0) >= (master?.id === "any" ? activeMasterCount : 1));
+  }, [activeMasterCount, date, master?.id, monthBookings]);
+
+  useEffect(() => {
+    if (time && busyTimes.includes(time)) setTime(null);
+  }, [busyTimes, time]);
 
   const canNext = useMemo(() => {
     if (step === 1) return !!service;
@@ -78,18 +133,30 @@ function BookingPage() {
     if (!service || !master || !date || !time) return;
     setSubmitting(true); setError("");
     try {
+      const bookingDate = dateKey(date);
+      let check = supabase
+        .from("bookings")
+        .select("id", { count: "exact", head: true })
+        .eq("booking_date", bookingDate)
+        .eq("booking_time", time + ":00")
+        .neq("status", "cancelled");
+      if (master.id !== "any") check = check.eq("master_id", master.id);
+      const { count } = await check;
+      if ((count || 0) >= (master.id === "any" ? activeMasterCount : 1)) {
+        throw new Error("Это время уже занято. Выберите другой слот.");
+      }
+
       const payload = {
         client_name: name.trim(),
         phone: "+" + cleanPhone(phone),
         service_id: service.id,
         master_id: master.id === "any" ? null : master.id,
-        booking_date: date.toISOString().slice(0, 10),
+        booking_date: bookingDate,
         booking_time: time + ":00",
         comment: comment.trim() || null,
       };
       const { error: e } = await supabase.from("bookings").insert(payload);
       if (e) throw e;
-      // fire-and-forget notify
       fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-telegram`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -146,7 +213,7 @@ function BookingPage() {
                       <button
                         key={s.id}
                         onClick={() => setService(s)}
-                        className={`text-left bg-card border p-6 transition-colors ${service?.id === s.id ? "border-gold" : "border-divider hover:border-gold/50"}`}
+                        className={`text-left bg-card border p-6 transition-all duration-300 hover:-translate-y-1 ${service?.id === s.id ? "border-gold" : "border-divider hover:border-gold/50"}`}
                       >
                         <div className="font-serif text-2xl">{s.name}</div>
                         <div className="mt-4 flex justify-between items-end">
@@ -162,8 +229,8 @@ function BookingPage() {
                     {masters.map((m) => (
                       <button
                         key={m.id}
-                        onClick={() => setMaster(m)}
-                        className={`text-left bg-card border p-6 transition-colors ${master?.id === m.id ? "border-gold" : "border-divider hover:border-gold/50"}`}
+                        onClick={() => { setMaster(m); setDate(null); setTime(null); }}
+                        className={`text-left bg-card border p-6 transition-all duration-300 hover:-translate-y-1 ${master?.id === m.id ? "border-gold" : "border-divider hover:border-gold/50"}`}
                       >
                         <div className="font-serif text-xl">{m.name}</div>
                         <div className="mt-1 text-sm text-foreground/60">{m.speciality}</div>
@@ -171,41 +238,21 @@ function BookingPage() {
                     ))}
                   </div>
                 )}
-                {step === 3 && <CalendarPicker value={date} onChange={setDate} />}
+                {step === 3 && <CalendarPicker value={date} month={month} unavailableDates={unavailableDates} onMonthChange={setMonth} onChange={(d) => { setDate(d); setTime(null); }} />}
                 {step === 4 && (
-                  <TimeGrid
-                    busyTimes={busy.map(b => b.time)}
-                    value={time}
-                    onChange={setTime}
-                  />
+                  <TimeGrid busyTimes={busyTimes} value={time} onChange={setTime} />
                 )}
                 {step === 5 && (
                   <div className="grid gap-8 md:grid-cols-[1fr_320px]">
                     <div className="space-y-6">
                       <Field label="ВАШЕ ИМЯ">
-                        <input
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Александр"
-                          className="w-full bg-transparent border-b border-divider focus:border-gold outline-none py-3 text-lg"
-                        />
+                        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Александр" className="w-full bg-transparent border-b border-divider focus:border-gold outline-none py-3 text-lg" />
                       </Field>
                       <Field label="ТЕЛЕФОН">
-                        <input
-                          value={phone}
-                          onChange={(e) => setPhone(formatPhone(e.target.value))}
-                          className="w-full bg-transparent border-b border-divider focus:border-gold outline-none py-3 text-lg font-mono"
-                        />
+                        <input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} className="w-full bg-transparent border-b border-divider focus:border-gold outline-none py-3 text-lg font-mono" />
                       </Field>
                       <Field label="КОММЕНТАРИЙ (НЕОБЯЗАТЕЛЬНО)">
-                        <textarea
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                          rows={3}
-                          maxLength={500}
-                          placeholder="Пожелания к стрижке, аллергии, etc."
-                          className="w-full bg-transparent border border-divider focus:border-gold outline-none p-3 text-sm resize-none"
-                        />
+                        <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} maxLength={500} placeholder="Пожелания к стрижке" className="w-full bg-transparent border border-divider focus:border-gold outline-none p-3 text-sm resize-none" />
                       </Field>
                       {error && <div className="text-destructive text-sm">{error}</div>}
                     </div>
@@ -215,27 +262,15 @@ function BookingPage() {
               </div>
 
               <div className="mt-12 flex justify-between border-t border-divider pt-6">
-                <button
-                  onClick={() => setStep((s) => Math.max(1, s - 1))}
-                  disabled={step === 1}
-                  className="font-display text-xs tracking-[0.25em] text-foreground/60 hover:text-gold disabled:opacity-30"
-                >
+                <button onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="font-display text-xs tracking-[0.25em] text-foreground/60 hover:text-gold disabled:opacity-30">
                   ← НАЗАД
                 </button>
                 {step < 5 ? (
-                  <button
-                    onClick={() => setStep((s) => s + 1)}
-                    disabled={!canNext}
-                    className="border border-gold px-8 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gold transition-colors"
-                  >
+                  <button onClick={() => setStep((s) => s + 1)} disabled={!canNext} className="border border-gold px-8 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gold transition-colors">
                     ДАЛЕЕ →
                   </button>
                 ) : (
-                  <button
-                    onClick={submit}
-                    disabled={!canNext || submitting}
-                    className="border border-gold bg-gold text-black px-8 py-3 font-display text-xs tracking-[0.25em] hover:bg-gold-light disabled:opacity-40 transition-colors flex items-center gap-3"
-                  >
+                  <button onClick={submit} disabled={!canNext || submitting} className="border border-gold bg-gold text-black px-8 py-3 font-display text-xs tracking-[0.25em] hover:bg-gold-light disabled:opacity-40 transition-colors flex items-center gap-3">
                     {submitting && <Spinner />}
                     ПОДТВЕРДИТЬ ЗАПИСЬ
                   </button>
@@ -247,19 +282,12 @@ function BookingPage() {
           {step === 6 && (
             <div className="mt-16 text-center animate-slide-in">
               <div className="mx-auto w-24 h-24 border-2 border-gold flex items-center justify-center">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12 text-gold">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12 text-gold"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
               </div>
               <h2 className="mt-8 font-serif text-5xl">Вы записаны!</h2>
               <p className="mt-4 text-foreground/70">Мы перезвоним для подтверждения в ближайшее время.</p>
-              <div className="mt-10 max-w-md mx-auto text-left">
-                <Summary service={service} master={master} date={date} time={time} />
-              </div>
-              <button
-                onClick={() => navigate({ to: "/" })}
-                className="mt-10 border border-gold px-10 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black transition-colors"
-              >
+              <div className="mt-10 max-w-md mx-auto text-left"><Summary service={service} master={master} date={date} time={time} /></div>
+              <button onClick={() => navigate({ to: "/" })} className="mt-10 border border-gold px-10 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black transition-colors">
                 НА ГЛАВНУЮ
               </button>
             </div>
@@ -271,17 +299,9 @@ function BookingPage() {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <div className="font-display text-[10px] tracking-[0.3em] text-gold mb-2">{label}</div>
-      {children}
-    </label>
-  );
+  return <label className="block"><div className="font-display text-[10px] tracking-[0.3em] text-gold mb-2">{label}</div>{children}</label>;
 }
-
-function Spinner() {
-  return <span className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />;
-}
+function Spinner() { return <span className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />; }
 
 function Summary({ service, master, date, time }: { service: Service | null; master: Master | null; date: Date | null; time: string | null }) {
   return (
@@ -292,31 +312,18 @@ function Summary({ service, master, date, time }: { service: Service | null; mas
         <Row k="Мастер" v={master?.name} />
         <Row k="Дата" v={date ? date.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) : undefined} />
         <Row k="Время" v={time || undefined} />
-        {service && (
-          <div className="pt-3 mt-3 border-t border-divider flex justify-between">
-            <span className="text-muted-foreground">Итого</span>
-            <span className="font-display text-xl text-gold">{formatPrice(service.price)}</span>
-          </div>
-        )}
+        {service && <div className="pt-3 mt-3 border-t border-divider flex justify-between"><span className="text-muted-foreground">Итого</span><span className="font-display text-xl text-gold">{formatPrice(service.price)}</span></div>}
       </div>
     </div>
   );
 }
-function Row({ k, v }: { k: string; v?: string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <span className="text-muted-foreground">{k}</span>
-      <span className="text-foreground/90 text-right">{v || "—"}</span>
-    </div>
-  );
-}
+function Row({ k, v }: { k: string; v?: string }) { return <div className="flex justify-between gap-3"><span className="text-muted-foreground">{k}</span><span className="text-foreground/90 text-right">{v || "—"}</span></div>; }
 
-function CalendarPicker({ value, onChange }: { value: Date | null; onChange: (d: Date) => void }) {
-  const [month, setMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
+function CalendarPicker({ value, month, unavailableDates, onMonthChange, onChange }: { value: Date | null; month: Date; unavailableDates: string[]; onMonthChange: (d: Date) => void; onChange: (d: Date) => void }) {
   const today = new Date(); today.setHours(0,0,0,0);
   const first = new Date(month);
   const daysInMonth = new Date(month.getFullYear(), month.getMonth()+1, 0).getDate();
-  const startWeekday = (first.getDay() + 6) % 7; // Mon=0
+  const startWeekday = (first.getDay() + 6) % 7;
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startWeekday; i++) cells.push(null);
   for (let i = 1; i <= daysInMonth; i++) cells.push(new Date(month.getFullYear(), month.getMonth(), i));
@@ -324,67 +331,42 @@ function CalendarPicker({ value, onChange }: { value: Date | null; onChange: (d:
   return (
     <div className="bg-card border border-divider p-6 max-w-md mx-auto">
       <div className="flex items-center justify-between">
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth()-1, 1))} className="text-gold hover:text-gold-light font-display">←</button>
-        <div className="font-serif text-xl capitalize">
-          {month.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}
-        </div>
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth()+1, 1))} className="text-gold hover:text-gold-light font-display">→</button>
+        <button onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth()-1, 1))} className="text-gold hover:text-gold-light font-display">←</button>
+        <div className="font-serif text-xl capitalize">{month.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}</div>
+        <button onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth()+1, 1))} className="text-gold hover:text-gold-light font-display">→</button>
       </div>
       <div className="mt-6 grid grid-cols-7 gap-1 text-center">
-        {["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(d => (
-          <div key={d} className="font-display text-[10px] tracking-[0.2em] text-muted-foreground py-2">{d}</div>
-        ))}
+        {["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(d => <div key={d} className="font-display text-[10px] tracking-[0.2em] text-muted-foreground py-2">{d}</div>)}
         {cells.map((d, i) => {
           if (!d) return <div key={i} />;
+          const key = dateKey(d);
           const past = d < today;
           const sunday = d.getDay() === 0;
-          const disabled = past || sunday;
+          const fullyBooked = unavailableDates.includes(key);
+          const disabled = past || sunday || fullyBooked;
           const selected = value && d.toDateString() === value.toDateString();
           return (
-            <button
-              key={i}
-              disabled={disabled}
-              onClick={() => onChange(d)}
-              className={`aspect-square text-sm transition-colors ${
-                selected ? "bg-gold text-black" :
-                disabled ? "text-muted-foreground/30" :
-                "text-foreground hover:bg-gold/20"
-              }`}
-            >
+            <button key={i} disabled={disabled} onClick={() => onChange(d)} title={fullyBooked ? "Все часы заняты" : undefined}
+              className={`aspect-square text-sm transition-colors ${selected ? "bg-gold text-black" : disabled ? "bg-divider/30 text-muted-foreground/35 cursor-not-allowed line-through" : "text-foreground hover:bg-gold/20"}`}>
               {d.getDate()}
             </button>
           );
         })}
       </div>
-      <div className="mt-4 font-display text-[10px] tracking-[0.25em] text-muted-foreground text-center">
-        ВОСКРЕСЕНЬЕ — ВЫХОДНОЙ
-      </div>
+      <div className="mt-4 font-display text-[10px] tracking-[0.25em] text-muted-foreground text-center">СЕРЫЕ ДАТЫ НЕДОСТУПНЫ</div>
     </div>
   );
 }
 
 function TimeGrid({ busyTimes, value, onChange }: { busyTimes: string[]; value: string | null; onChange: (t: string) => void }) {
-  const slots: string[] = [];
-  for (let h = 10; h < 20; h++) {
-    slots.push(`${String(h).padStart(2,"0")}:00`);
-    slots.push(`${String(h).padStart(2,"0")}:30`);
-  }
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-w-2xl mx-auto">
-      {slots.map((t) => {
+      {SLOTS.map((t) => {
         const busy = busyTimes.includes(t);
         const sel = value === t;
         return (
-          <button
-            key={t}
-            disabled={busy}
-            onClick={() => onChange(t)}
-            className={`py-3 font-display text-sm tracking-[0.15em] border transition-colors ${
-              sel ? "bg-gold text-black border-gold" :
-              busy ? "border-divider text-muted-foreground/40 cursor-not-allowed line-through" :
-              "border-divider text-foreground hover:border-gold hover:text-gold"
-            }`}
-          >
+          <button key={t} disabled={busy} onClick={() => onChange(t)} title={busy ? "Время уже занято" : undefined}
+            className={`py-3 font-display text-sm tracking-[0.15em] border transition-colors ${sel ? "bg-gold text-black border-gold" : busy ? "bg-divider/30 border-divider text-muted-foreground/40 cursor-not-allowed line-through" : "border-divider text-foreground hover:border-gold hover:text-gold"}`}>
             {t}
           </button>
         );
