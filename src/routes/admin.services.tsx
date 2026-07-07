@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaUpload, isVideoMedia } from "@/components/admin/MediaUpload";
 import { formatPrice, formatDuration } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/services")({
@@ -66,7 +67,16 @@ function ServicesAdmin() {
 
       <div className="mt-10 grid gap-4 md:grid-cols-2">
         {items.map((s) => (
-          <div key={s.id} className={`bg-card border p-6 ${s.is_active ? "border-divider" : "border-divider opacity-50"}`}>
+          <div key={s.id} className={`bg-card border p-6 transition-all duration-300 hover:-translate-y-1 hover:border-gold/50 ${s.is_active ? "border-divider" : "border-divider opacity-50"}`}>
+            {s.image_url && (
+              <div className="mb-5 aspect-[16/8] overflow-hidden border border-divider bg-black">
+                {isVideoMedia(s.image_url) ? (
+                  <video src={s.image_url} className="h-full w-full object-cover" muted playsInline />
+                ) : (
+                  <img src={s.image_url} alt="" className="h-full w-full object-cover" />
+                )}
+              </div>
+            )}
             <div className="flex justify-between gap-4">
               <div className="min-w-0">
                 <div className="font-serif text-2xl">{s.name}</div>
@@ -97,7 +107,7 @@ function ServicesAdmin() {
               <Input label="ЦЕНА, ₽" type="number" value={String(editing.price ?? "")} onChange={v => setEditing({ ...editing, price: Number(v) })} />
               <Input label="ДЛИТ., МИН" type="number" value={String(editing.duration ?? "")} onChange={v => setEditing({ ...editing, duration: Number(v) })} />
             </div>
-            <Input label="URL ФОТО" value={editing.image_url || ""} onChange={v => setEditing({ ...editing, image_url: v })} />
+            <MediaUpload label="ФОТО ИЛИ ВИДЕО" value={editing.image_url || ""} onChange={v => setEditing({ ...editing, image_url: v })} />
             <Input label="ПОРЯДОК" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />
           </div>
           <div className="mt-8 flex justify-end gap-3">
@@ -116,10 +126,10 @@ export function Input({ label, value, onChange, type = "text", textarea = false 
       <div className="font-display text-[10px] tracking-[0.3em] text-gold mb-2">{label}</div>
       {textarea ? (
         <textarea value={value} onChange={e => onChange(e.target.value)} rows={3}
-          className="w-full bg-black border border-divider focus:border-gold outline-none p-3 text-sm resize-none" />
+          className="w-full bg-black border border-divider focus:border-gold outline-none p-3 text-sm resize-none transition-colors" />
       ) : (
         <input type={type} value={value} onChange={e => onChange(e.target.value)}
-          className="w-full bg-black border border-divider focus:border-gold outline-none p-3 text-sm" />
+          className="w-full bg-black border border-divider focus:border-gold outline-none p-3 text-sm transition-colors" />
       )}
     </label>
   );
@@ -128,7 +138,7 @@ export function Input({ label, value, onChange, type = "text", textarea = false 
 export function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur flex items-center justify-center p-4" onClick={onClose}>
-      <div className="w-full max-w-lg bg-dark border border-gold/40 p-8 animate-slide-in" onClick={e => e.stopPropagation()}>
+      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-dark border border-gold/40 p-8 animate-slide-in" onClick={e => e.stopPropagation()}>
         {children}
       </div>
     </div>
