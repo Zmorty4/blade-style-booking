@@ -161,6 +161,15 @@
   animation: hero-rise 1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+@keyframes ken-burns {
+  0% { transform: scale(1.04) translate3d(0, 0, 0); }
+  50% { transform: scale(1.1) translate3d(-1.5%, -1%, 0); }
+  100% { transform: scale(1.04) translate3d(0, 0, 0); }
+}
+@utility animate-ken-burns {
+  animation: ken-burns 18s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
