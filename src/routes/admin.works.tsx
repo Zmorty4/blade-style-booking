@@ -17,7 +17,7 @@ type Work = {
   sort_order: number;
 };
 
-const EMPTY: Partial<Work> = { title: "", description: "", image_url: "", is_active: true, sort_order: 0 };
+const EMPTY: Partial<Work> = { title: "Фото", description: "", image_url: "", is_active: true, sort_order: 0 };
 const db = supabase as any;
 
 function WorksAdmin() {
@@ -32,10 +32,10 @@ function WorksAdmin() {
   useEffect(() => { load(); }, []);
 
   async function save() {
-    if (!editing?.title) return;
+    if (!editing?.image_url) return;
     const payload = {
-      title: editing.title,
-      description: editing.description || null,
+      title: editing.title?.trim() || "Фото",
+      description: null,
       image_url: editing.image_url || null,
       is_active: editing.is_active ?? true,
       sort_order: Number(editing.sort_order) || 0,
@@ -74,12 +74,8 @@ function WorksAdmin() {
           <div key={item.id} className={`border bg-white/45 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 ${item.is_active ? "border-[#171411]/12" : "border-[#171411]/10 opacity-50"}`}>
             <div className="aspect-[4/5] overflow-hidden border border-[#171411]/10 bg-[#171411]/8">
               {item.image_url ? (
-                isVideoMedia(item.image_url) ? <video src={item.image_url} className="h-full w-full object-cover grayscale" muted playsInline /> : <img src={item.image_url} alt="" className="h-full w-full object-cover grayscale" />
+                isVideoMedia(item.image_url) ? <video src={item.image_url} className="h-full w-full object-cover object-center grayscale" muted playsInline /> : <img src={item.image_url} alt="" className="h-full w-full object-cover object-center grayscale" />
               ) : <div className="flex h-full items-center justify-center text-sm text-[#171411]/45">Нет фото</div>}
-            </div>
-            <div className="mt-5">
-              <div className="text-2xl font-extrabold tracking-[-0.025em]">{item.title}</div>
-              <div className="mt-1 min-h-10 line-clamp-2 text-sm text-[#171411]/56">{item.description}</div>
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
               <button onClick={() => setEditing(item)} className="flex-1 border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">Редакт.</button>
@@ -93,11 +89,9 @@ function WorksAdmin() {
       {editing && (
         <Modal onClose={() => setEditing(null)}>
           <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">{editing.id ? "Редактирование" : "Новая работа"}</div>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.03em]">{editing.title || "Работа"}</h2>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.03em]">Фото</h2>
           <div className="mt-6 space-y-5">
-            <Input label="Название" value={editing.title || ""} onChange={v => setEditing({ ...editing, title: v })} />
-            <Input label="Описание" value={editing.description || ""} onChange={v => setEditing({ ...editing, description: v })} textarea />
-            <MediaUpload label="Фото или видео" value={editing.image_url || ""} onChange={v => setEditing({ ...editing, image_url: v })} />
+            <MediaUpload label="Фото" value={editing.image_url || ""} onChange={v => setEditing({ ...editing, image_url: v })} accept="image/*" />
             <Input label="Порядок" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />
           </div>
           <div className="mt-8 flex justify-end gap-3">
