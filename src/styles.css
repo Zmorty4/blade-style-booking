@@ -103,6 +103,15 @@
   }
 }
 
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility font-display {
   font-family: var(--font-display);
   font-weight: 500;
@@ -124,13 +133,6 @@
 @utility glass-panel {
   background: color-mix(in srgb, var(--card) 82%, transparent);
   backdrop-filter: blur(18px);
-}
-
-@utility no-scrollbar {
-  scrollbar-width: none;
-}
-@utility no-scrollbar::-webkit-scrollbar {
-  display: none;
 }
 
 @utility hover-lift {
