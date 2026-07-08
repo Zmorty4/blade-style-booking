@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import type { FormEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site/SiteHeader";
@@ -187,8 +187,6 @@ function BookingPage() {
     }
   }
 
-  const steps = ["Услуга", "Мастер", "Дата", "Время", "Данные"];
-
   return (
     <div className="min-h-screen bg-[#f3eee5] text-[#171411]">
       <SiteHeader />
@@ -199,27 +197,12 @@ function BookingPage() {
             <div>
               <div className="inline-flex rounded-full border border-[#171411]/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#171411]/62">Online booking</div>
               <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.02] tracking-[-0.035em] md:text-6xl">Запись без звонков и ожидания.</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#171411]/62">Выбранные пункты теперь выделяются тёмным фоном и галочкой, чтобы сразу было понятно, что уже выбрано.</p>
             </div>
             {step <= 5 && <Summary service={service} master={master} date={date} time={time} compact />}
           </div>
 
           {step <= 5 && (
             <>
-              <div className="mt-10 grid gap-2 sm:grid-cols-5">
-                {steps.map((label, i) => {
-                  const n = i + 1;
-                  const active = n === step;
-                  const done = n < step;
-                  return (
-                    <button key={label} onClick={() => done && setStep(n)} className={`rounded-full border px-3 py-3 text-left transition-colors ${active ? "border-[#171411] bg-[#171411] text-[#f3eee5]" : done ? "border-[#171411]/25 bg-white/45 text-[#171411] hover:border-[#171411]" : "border-[#171411]/12 text-[#171411]/45"}`}>
-                      <div className="text-[10px] font-extrabold uppercase tracking-[0.18em]">{String(n).padStart(2, "0")}</div>
-                      <div className="mt-1 text-sm font-extrabold">{label}</div>
-                    </button>
-                  );
-                })}
-              </div>
-
               <div key={step} className="mt-10 animate-slide-in">
                 {step === 1 && (
                   <div className="grid gap-4 md:grid-cols-2">
