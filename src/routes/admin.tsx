@@ -68,6 +68,7 @@ function AdminShell() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: s => s.location.pathname });
   const [newCount, setNewCount] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -87,38 +88,63 @@ function AdminShell() {
     { to: "/admin/bookings", label: "Заявки", badge: newCount },
     { to: "/admin/services", label: "Услуги" },
     { to: "/admin/masters", label: "Мастера" },
+    { to: "/admin/works", label: "Работы" },
     { to: "/admin/settings", label: "Настройки" },
   ];
 
   useEffect(() => {
     if (pathname === "/admin") navigate({ to: "/admin/bookings", replace: true });
+    setMenuOpen(false);
   }, [pathname, navigate]);
 
+  const nav = (
+    <>
+      <Link to="/" className="font-display text-lg tracking-[0.25em]">BLADE &amp; STYLE</Link>
+      <div className="font-display text-[10px] tracking-[0.3em] text-gold mt-1">АДМИН</div>
+      <nav className="mt-10 space-y-1 flex-1">
+        {items.map((it) => {
+          const active = pathname === it.to;
+          return (
+            <Link key={it.to} to={it.to}
+              className={`flex items-center justify-between px-3 py-3 font-display text-xs tracking-[0.2em] transition-colors ${active ? "bg-card text-gold border-l-2 border-gold" : "text-foreground/70 hover:text-gold border-l-2 border-transparent"}`}>
+              <span>{it.label.toUpperCase()}</span>
+              {"badge" in it && it.badge ? <span className="bg-gold text-black px-2 py-0.5 text-[10px]">{it.badge}</span> : null}
+            </Link>
+          );
+        })}
+      </nav>
+      <button
+        onClick={async () => { await supabase.auth.signOut(); }}
+        className="mt-6 text-left font-display text-[10px] tracking-[0.3em] text-muted-foreground hover:text-gold"
+      >
+        ВЫЙТИ →
+      </button>
+    </>
+  );
+
   return (
-    <div className="min-h-screen bg-black text-foreground flex">
-      <aside className="w-64 border-r border-divider min-h-screen p-6 flex flex-col">
-        <Link to="/" className="font-display text-lg tracking-[0.25em]">BLADE &amp; STYLE</Link>
-        <div className="font-display text-[10px] tracking-[0.3em] text-gold mt-1">АДМИН</div>
-        <nav className="mt-10 space-y-1 flex-1">
-          {items.map((it) => {
-            const active = pathname === it.to;
-            return (
-              <Link key={it.to} to={it.to}
-                className={`flex items-center justify-between px-3 py-3 font-display text-xs tracking-[0.2em] transition-colors ${active ? "bg-card text-gold border-l-2 border-gold" : "text-foreground/70 hover:text-gold border-l-2 border-transparent"}`}>
-                <span>{it.label.toUpperCase()}</span>
-                {"badge" in it && it.badge ? <span className="bg-gold text-black px-2 py-0.5 text-[10px]">{it.badge}</span> : null}
-              </Link>
-            );
-          })}
-        </nav>
+    <div className="min-h-screen bg-black text-foreground lg:flex">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-divider bg-black/90 px-4 py-4 backdrop-blur lg:hidden">
+        <div>
+          <div className="font-display text-sm tracking-[0.25em]">BLADE &amp; STYLE</div>
+          <div className="font-display text-[9px] tracking-[0.3em] text-gold">АДМИН</div>
+        </div>
         <button
-          onClick={async () => { await supabase.auth.signOut(); }}
-          className="mt-6 text-left font-display text-[10px] tracking-[0.3em] text-muted-foreground hover:text-gold"
+          onClick={() => setMenuOpen(v => !v)}
+          className="border border-gold px-4 py-2 font-display text-[10px] tracking-[0.25em] text-gold"
+          aria-expanded={menuOpen}
         >
-          ВЫЙТИ →
+          {menuOpen ? "ЗАКРЫТЬ" : "МЕНЮ"}
         </button>
+      </header>
+
+      {menuOpen && <button className="fixed inset-0 z-40 bg-black/70 lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Закрыть меню" />}
+
+      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-72 max-w-[86vw] flex-col border-r border-divider bg-black p-6 transition-transform duration-300 lg:sticky lg:z-auto lg:w-64 lg:translate-x-0 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        {nav}
       </aside>
-      <main className="flex-1 p-10 overflow-x-auto">
+
+      <main className="min-w-0 flex-1 overflow-x-auto p-4 sm:p-6 lg:p-10">
         <Outlet />
       </main>
     </div>
