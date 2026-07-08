@@ -193,3 +193,11 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+#works .snap-start {
+  scroll-snap-align: center;
+}
+
+#works .snap-start > .absolute {
+  display: none;
+}
