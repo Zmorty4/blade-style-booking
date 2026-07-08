@@ -35,6 +35,14 @@ function monthBounds(month: Date) {
   return { start: dateKey(start), end: dateKey(end) };
 }
 
+async function cleanupPastBookings() {
+  try {
+    await (supabase as any).rpc("cleanup_past_bookings");
+  } catch {
+    // Booking should still work even if background cleanup fails.
+  }
+}
+
 function BookingPage() {
   const search = Route.useSearch();
   const navigate = useNavigate();
@@ -55,7 +63,7 @@ function BookingPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    (supabase as any).rpc("cleanup_past_bookings").catch(() => {});
+    void cleanupPastBookings();
     (async () => {
       const [s, m] = await Promise.all([
         supabase.from("services").select("id,name,price,duration,image_url").eq("is_active", true).order("sort_order"),
