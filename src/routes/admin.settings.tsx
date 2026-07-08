@@ -42,26 +42,28 @@ function SettingsAdmin() {
 
   return (
     <div>
-      <div className="font-display text-[10px] tracking-[0.3em] text-gold">НАСТРОЙКИ</div>
-      <h1 className="mt-2 font-serif text-4xl">Заведение</h1>
+      <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Настройки</div>
+      <h1 className="mt-2 text-4xl font-extrabold tracking-[-0.035em]">Заведение</h1>
 
-      <div className="mt-10 max-w-2xl space-y-6">
-        <Input label="НАЗВАНИЕ" value={form.shop_name} onChange={upd("shop_name")} />
-        <Input label="СЛОГАН" value={form.tagline} onChange={upd("tagline")} />
-        <div className="grid grid-cols-2 gap-4">
-          <Input label="ТЕЛЕФОН" value={form.phone} onChange={upd("phone")} />
-          <Input label="INSTAGRAM" value={form.instagram} onChange={upd("instagram")} />
-        </div>
-        <Input label="АДРЕС" value={form.address} onChange={upd("address")} />
-        <Input label="ЧАСЫ РАБОТЫ" value={form.working_hours} onChange={upd("working_hours")} />
-        <MediaUpload label="HERO-ФОТО ИЛИ ВИДЕО" value={form.hero_image_url} onChange={upd("hero_image_url")} />
-        <MediaUpload label="ЛОГОТИП" value={form.logo_url} onChange={upd("logo_url")} accept="image/*" />
-        <div className="flex items-center gap-4 pt-4">
-          <button onClick={save} disabled={loading} className="border border-gold bg-gold text-black px-8 py-3 font-display text-xs tracking-[0.25em] hover:bg-gold-light disabled:opacity-50 flex items-center gap-3">
-            {loading && <span className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />}
-            СОХРАНИТЬ
-          </button>
-          {saved && <span className="font-display text-xs tracking-[0.25em] text-gold">✓ СОХРАНЕНО</span>}
+      <div className="mt-9 max-w-3xl border border-[#171411]/12 bg-white/35 p-5 md:p-7">
+        <div className="space-y-6">
+          <Input label="Название" value={form.shop_name} onChange={upd("shop_name")} />
+          <Input label="Слоган" value={form.tagline} onChange={upd("tagline")} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input label="Телефон" value={form.phone} onChange={upd("phone")} />
+            <Input label="Instagram" value={form.instagram} onChange={upd("instagram")} />
+          </div>
+          <Input label="Адрес" value={form.address} onChange={upd("address")} />
+          <Input label="Часы работы" value={form.working_hours} onChange={upd("working_hours")} />
+          <MediaUpload label="Hero-фото или видео" value={form.hero_image_url} onChange={upd("hero_image_url")} />
+          <MediaUpload label="Логотип" value={form.logo_url} onChange={upd("logo_url")} accept="image/*" />
+          <div className="flex items-center gap-4 pt-2">
+            <button onClick={save} disabled={loading} className="flex items-center gap-3 rounded-full bg-[#171411] px-8 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black disabled:opacity-50">
+              {loading && <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#f3eee5] border-t-transparent" />}
+              Сохранить
+            </button>
+            {saved && <span className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411]/62">✓ Сохранено</span>}
+          </div>
         </div>
       </div>
     </div>
