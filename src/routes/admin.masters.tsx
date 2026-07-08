@@ -41,32 +41,32 @@ function MastersAdmin() {
 
   return (
     <div>
-      <div className="flex justify-between items-end flex-wrap gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="font-display text-[10px] tracking-[0.3em] text-gold">МАСТЕРА</div>
-          <h1 className="mt-2 font-serif text-4xl">Команда</h1>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Мастера</div>
+          <h1 className="mt-2 text-4xl font-extrabold tracking-[-0.035em]">Команда</h1>
         </div>
-        <button onClick={() => setEditing({ ...EMPTY })} className="border border-gold px-6 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black transition-colors">
-          + ДОБАВИТЬ МАСТЕРА
+        <button onClick={() => setEditing({ ...EMPTY })} className="rounded-full bg-[#171411] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black">
+          + Добавить мастера
         </button>
       </div>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((m) => (
-          <div key={m.id} className="bg-card border border-divider p-6 transition-all duration-300 hover:-translate-y-1 hover:border-gold/50">
+          <div key={m.id} className="border border-[#171411]/12 bg-white/45 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35">
             <div className="flex gap-4">
               {m.photo_url ? (
-                isVideoMedia(m.photo_url) ? <video src={m.photo_url} className="w-20 h-20 object-cover" muted playsInline /> : <img src={m.photo_url} alt="" className="w-20 h-20 object-cover" />
-              ) : <div className="w-20 h-20 bg-black border border-divider" />}
+                isVideoMedia(m.photo_url) ? <video src={m.photo_url} className="h-20 w-20 object-cover grayscale" muted playsInline /> : <img src={m.photo_url} alt="" className="h-20 w-20 object-cover grayscale" />
+              ) : <div className="h-20 w-20 border border-[#171411]/12 bg-[#171411]/8" />}
               <div className="min-w-0 flex-1">
-                <div className="font-serif text-xl truncate">{m.name}</div>
-                <div className="text-sm text-foreground/60">{m.speciality}</div>
-                <div className="mt-1 font-display text-xs text-gold tracking-[0.2em]">{m.experience}</div>
+                <div className="truncate text-xl font-extrabold tracking-[-0.02em]">{m.name}</div>
+                <div className="text-sm text-[#171411]/58">{m.speciality}</div>
+                <div className="mt-1 text-xs font-bold uppercase tracking-[0.16em] text-[#171411]/42">{m.experience}</div>
               </div>
             </div>
             <div className="mt-4 flex gap-2">
-              <button onClick={() => setEditing(m)} className="flex-1 border border-divider hover:border-gold py-2 text-xs font-display tracking-[0.2em]">РЕДАКТ.</button>
-              <button onClick={() => del(m.id)} className="border border-divider hover:border-destructive hover:text-destructive px-3 py-2 text-xs font-display tracking-[0.2em]">УДАЛ.</button>
+              <button onClick={() => setEditing(m)} className="flex-1 border border-[#171411]/15 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">Редакт.</button>
+              <button onClick={() => del(m.id)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-destructive hover:text-destructive">Удал.</button>
             </div>
           </div>
         ))}
@@ -74,17 +74,17 @@ function MastersAdmin() {
 
       {editing && (
         <Modal onClose={() => setEditing(null)}>
-          <div className="font-display text-[10px] tracking-[0.3em] text-gold">{editing.id ? "РЕДАКТИРОВАНИЕ" : "НОВЫЙ МАСТЕР"}</div>
-          <h2 className="mt-2 font-serif text-3xl">{editing.name || "Мастер"}</h2>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">{editing.id ? "Редактирование" : "Новый мастер"}</div>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.03em]">{editing.name || "Мастер"}</h2>
           <div className="mt-6 space-y-5">
-            <Input label="ИМЯ" value={editing.name || ""} onChange={v => setEditing({ ...editing, name: v })} />
-            <Input label="СПЕЦИАЛИЗАЦИЯ" value={editing.speciality || ""} onChange={v => setEditing({ ...editing, speciality: v })} />
-            <Input label="ОПЫТ" value={editing.experience || ""} onChange={v => setEditing({ ...editing, experience: v })} />
-            <MediaUpload label="ФОТО ИЛИ ВИДЕО" value={editing.photo_url || ""} onChange={v => setEditing({ ...editing, photo_url: v })} />
+            <Input label="Имя" value={editing.name || ""} onChange={v => setEditing({ ...editing, name: v })} />
+            <Input label="Специализация" value={editing.speciality || ""} onChange={v => setEditing({ ...editing, speciality: v })} />
+            <Input label="Опыт" value={editing.experience || ""} onChange={v => setEditing({ ...editing, experience: v })} />
+            <MediaUpload label="Фото или видео" value={editing.photo_url || ""} onChange={v => setEditing({ ...editing, photo_url: v })} />
           </div>
           <div className="mt-8 flex justify-end gap-3">
-            <button onClick={() => setEditing(null)} className="px-6 py-2 font-display text-xs tracking-[0.25em] text-muted-foreground">ОТМЕНА</button>
-            <button onClick={save} className="border border-gold bg-gold text-black px-6 py-2 font-display text-xs tracking-[0.25em] hover:bg-gold-light">СОХРАНИТЬ</button>
+            <button onClick={() => setEditing(null)} className="px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411]/50 hover:text-[#171411]">Отмена</button>
+            <button onClick={save} className="rounded-full bg-[#171411] px-6 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black">Сохранить</button>
           </div>
         </Modal>
       )}
