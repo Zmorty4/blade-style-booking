@@ -42,33 +42,33 @@
 }
 
 :root {
-  --black: #050505;
-  --dark: #0d0d0d;
-  --gold: #c2a36b;
-  --gold-light: #e2c98f;
-  --gray-warm: #8a8379;
-  --divider: rgba(255, 255, 255, 0.12);
+  --black: #171411;
+  --dark: #171411;
+  --gold: #b99562;
+  --gold-light: #dcc49a;
+  --gray-warm: #7b7064;
+  --divider: rgba(23, 20, 17, 0.14);
 
   --radius: 4px;
-  --background: #050505;
-  --foreground: #ffffff;
-  --card: #0f0f0f;
-  --card-foreground: #ffffff;
-  --popover: #0d0d0d;
-  --popover-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #050505;
-  --secondary: #151515;
-  --secondary-foreground: #ffffff;
-  --muted: #151515;
-  --muted-foreground: rgba(255, 255, 255, 0.55);
-  --accent: #ffffff;
-  --accent-foreground: #050505;
+  --background: #f3eee5;
+  --foreground: #171411;
+  --card: #fffaf1;
+  --card-foreground: #171411;
+  --popover: #fffaf1;
+  --popover-foreground: #171411;
+  --primary: #171411;
+  --primary-foreground: #f3eee5;
+  --secondary: #e8dfd2;
+  --secondary-foreground: #171411;
+  --muted: #e8dfd2;
+  --muted-foreground: rgba(23, 20, 17, 0.58);
+  --accent: #171411;
+  --accent-foreground: #f3eee5;
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.12);
-  --input: rgba(255, 255, 255, 0.14);
-  --ring: #ffffff;
+  --destructive-foreground: #fffaf1;
+  --border: rgba(23, 20, 17, 0.14);
+  --input: rgba(23, 20, 17, 0.16);
+  --ring: #171411;
 }
 
 @layer base {
@@ -79,7 +79,7 @@
     scroll-behavior: smooth;
   }
   html, body {
-    background: #050505;
+    background: #f3eee5;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -98,8 +98,8 @@
     transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
   ::selection {
-    background: white;
-    color: var(--black);
+    background: var(--black);
+    color: #f3eee5;
   }
 }
 
@@ -175,6 +175,14 @@
 }
 @utility animate-ken-burns {
   animation: ken-burns 18s ease-in-out infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.333%); }
+}
+@utility animate-marquee {
+  animation: marquee 22s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
