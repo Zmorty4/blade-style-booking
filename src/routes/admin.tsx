@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,7 +18,7 @@ function AdminLayout() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  if (!ready) return <div className="min-h-screen bg-black" />;
+  if (!ready) return <div className="min-h-screen bg-[#f3eee5]" />;
   if (!session) return <LoginScreen />;
   return <AdminShell />;
 }
@@ -28,7 +29,7 @@ function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
-  async function submit(e: React.FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     setLoading(true); setErr("");
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -37,26 +38,26 @@ function LoginScreen() {
   }
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6">
-      <form onSubmit={submit} className="w-full max-w-sm">
-        <Link to="/" className="font-display text-[10px] tracking-[0.3em] text-muted-foreground hover:text-gold">← НА САЙТ</Link>
-        <div className="mt-6 font-display text-[10px] tracking-[0.3em] text-gold">АДМИН-ПАНЕЛЬ</div>
-        <h1 className="mt-3 font-serif text-4xl">Вход</h1>
-        <div className="mt-10 space-y-6">
+    <div className="flex min-h-screen items-center justify-center bg-[#f3eee5] px-5 text-[#171411]">
+      <form onSubmit={submit} className="w-full max-w-sm border border-[#171411]/12 bg-white/45 p-7 shadow-sm">
+        <Link to="/" className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/50 hover:text-[#171411]">← На сайт</Link>
+        <div className="mt-7 inline-flex rounded-full border border-[#171411]/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#171411]/62">Админ-панель</div>
+        <h1 className="mt-4 text-4xl font-extrabold tracking-[-0.035em]">Вход</h1>
+        <div className="mt-9 space-y-6">
           <label className="block">
-            <div className="font-display text-[10px] tracking-[0.3em] text-gold mb-2">EMAIL</div>
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">Email</div>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-              className="w-full bg-transparent border-b border-divider focus:border-gold outline-none py-3" />
+              className="w-full border-b border-[#171411]/18 bg-transparent py-3 outline-none focus:border-[#171411]" />
           </label>
           <label className="block">
-            <div className="font-display text-[10px] tracking-[0.3em] text-gold mb-2">ПАРОЛЬ</div>
+            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">Пароль</div>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
-              className="w-full bg-transparent border-b border-divider focus:border-gold outline-none py-3" />
+              className="w-full border-b border-[#171411]/18 bg-transparent py-3 outline-none focus:border-[#171411]" />
           </label>
-          {err && <div className="text-destructive text-sm">{err}</div>}
-          <button disabled={loading} className="w-full border border-gold py-4 font-display text-xs tracking-[0.3em] text-gold hover:bg-gold hover:text-black transition-colors flex justify-center items-center gap-3">
-            {loading && <span className="inline-block w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />}
-            ВОЙТИ
+          {err && <div className="border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{err}</div>}
+          <button disabled={loading} className="flex w-full items-center justify-center gap-3 rounded-full bg-[#171411] py-4 text-xs font-extrabold uppercase tracking-[0.2em] text-[#f3eee5] hover:bg-black disabled:opacity-50">
+            {loading && <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#f3eee5] border-t-transparent" />}
+            Войти
           </button>
         </div>
       </form>
@@ -99,48 +100,48 @@ function AdminShell() {
 
   const nav = (
     <>
-      <Link to="/" className="font-display text-lg tracking-[0.25em]">BLADE &amp; STYLE</Link>
-      <div className="font-display text-[10px] tracking-[0.3em] text-gold mt-1">АДМИН</div>
-      <nav className="mt-10 space-y-1 flex-1">
+      <Link to="/" className="text-xl font-extrabold uppercase tracking-[-0.04em] text-[#171411]">BLADE &amp; STYLE</Link>
+      <div className="mt-1 text-xs font-semibold text-[#171411]/52">Admin workspace</div>
+      <nav className="mt-9 flex-1 space-y-1">
         {items.map((it) => {
           const active = pathname === it.to;
           return (
             <Link key={it.to} to={it.to}
-              className={`flex items-center justify-between px-3 py-3 font-display text-xs tracking-[0.2em] transition-colors ${active ? "bg-card text-gold border-l-2 border-gold" : "text-foreground/70 hover:text-gold border-l-2 border-transparent"}`}>
-              <span>{it.label.toUpperCase()}</span>
-              {"badge" in it && it.badge ? <span className="bg-gold text-black px-2 py-0.5 text-[10px]">{it.badge}</span> : null}
+              className={`flex items-center justify-between rounded-full px-4 py-3 text-sm font-extrabold transition-colors ${active ? "bg-[#171411] text-[#f3eee5]" : "text-[#171411]/62 hover:bg-[#171411]/8 hover:text-[#171411]"}`}>
+              <span>{it.label}</span>
+              {"badge" in it && it.badge ? <span className={`px-2 py-0.5 text-[10px] ${active ? "bg-[#f3eee5] text-[#171411]" : "bg-[#171411] text-[#f3eee5]"}`}>{it.badge}</span> : null}
             </Link>
           );
         })}
       </nav>
       <button
         onClick={async () => { await supabase.auth.signOut(); }}
-        className="mt-6 text-left font-display text-[10px] tracking-[0.3em] text-muted-foreground hover:text-gold"
+        className="mt-6 text-left text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45 hover:text-[#171411]"
       >
-        ВЫЙТИ →
+        Выйти →
       </button>
     </>
   );
 
   return (
-    <div className="min-h-screen bg-black text-foreground lg:flex">
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-divider bg-black/90 px-4 py-4 backdrop-blur lg:hidden">
+    <div className="min-h-screen bg-[#f3eee5] text-[#171411] lg:flex">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[#171411]/10 bg-[#f3eee5]/90 px-4 py-4 backdrop-blur lg:hidden">
         <div>
-          <div className="font-display text-sm tracking-[0.25em]">BLADE &amp; STYLE</div>
-          <div className="font-display text-[9px] tracking-[0.3em] text-gold">АДМИН</div>
+          <div className="text-sm font-extrabold uppercase tracking-[-0.03em]">BLADE &amp; STYLE</div>
+          <div className="text-[11px] font-semibold text-[#171411]/52">Админ</div>
         </div>
         <button
           onClick={() => setMenuOpen(v => !v)}
-          className="border border-gold px-4 py-2 font-display text-[10px] tracking-[0.25em] text-gold"
+          className="rounded-full border border-[#171411]/20 px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#171411]"
           aria-expanded={menuOpen}
         >
-          {menuOpen ? "ЗАКРЫТЬ" : "МЕНЮ"}
+          {menuOpen ? "Закрыть" : "Меню"}
         </button>
       </header>
 
-      {menuOpen && <button className="fixed inset-0 z-40 bg-black/70 lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Закрыть меню" />}
+      {menuOpen && <button className="fixed inset-0 z-40 bg-[#171411]/50 lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Закрыть меню" />}
 
-      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-72 max-w-[86vw] flex-col border-r border-divider bg-black p-6 transition-transform duration-300 lg:sticky lg:z-auto lg:w-64 lg:translate-x-0 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-72 max-w-[86vw] flex-col border-r border-[#171411]/10 bg-[#f3eee5] p-6 transition-transform duration-300 lg:sticky lg:z-auto lg:w-64 lg:translate-x-0 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {nav}
       </aside>
 
