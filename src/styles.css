@@ -42,33 +42,33 @@
 }
 
 :root {
-  --black: #070706;
-  --dark: #10100f;
+  --black: #050505;
+  --dark: #0d0d0d;
   --gold: #c2a36b;
   --gold-light: #e2c98f;
   --gray-warm: #8a8379;
-  --divider: #2a2926;
+  --divider: rgba(255, 255, 255, 0.12);
 
   --radius: 4px;
-  --background: #070706;
-  --foreground: #f3efe7;
-  --card: #151513;
-  --card-foreground: #f3efe7;
-  --popover: #10100f;
-  --popover-foreground: #f3efe7;
-  --primary: #c2a36b;
-  --primary-foreground: #070706;
-  --secondary: #171715;
-  --secondary-foreground: #f3efe7;
-  --muted: #171715;
-  --muted-foreground: #8a8379;
-  --accent: #c2a36b;
-  --accent-foreground: #070706;
+  --background: #050505;
+  --foreground: #ffffff;
+  --card: #0f0f0f;
+  --card-foreground: #ffffff;
+  --popover: #0d0d0d;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #050505;
+  --secondary: #151515;
+  --secondary-foreground: #ffffff;
+  --muted: #151515;
+  --muted-foreground: rgba(255, 255, 255, 0.55);
+  --accent: #ffffff;
+  --accent-foreground: #050505;
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #f3efe7;
-  --border: #2a2926;
-  --input: #2a2926;
-  --ring: #c2a36b;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.12);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #ffffff;
 }
 
 @layer base {
@@ -79,9 +79,7 @@
     scroll-behavior: smooth;
   }
   html, body {
-    background:
-      radial-gradient(circle at top left, rgba(194, 163, 107, 0.08), transparent 32rem),
-      linear-gradient(180deg, #080807 0%, #070706 45%, #0d0d0c 100%);
+    background: #050505;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
@@ -91,16 +89,16 @@
     overflow-x: hidden;
   }
   h1, h2, h3, h4 {
-    font-family: var(--font-serif);
-    font-weight: 600;
-    letter-spacing: 0;
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: -0.03em;
   }
   a, button, input, textarea, select {
     transition-duration: 220ms;
     transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   }
   ::selection {
-    background: var(--gold);
+    background: white;
     color: var(--black);
   }
 }
@@ -126,6 +124,13 @@
 @utility glass-panel {
   background: color-mix(in srgb, var(--card) 82%, transparent);
   backdrop-filter: blur(18px);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+}
+@utility no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 @utility hover-lift {
