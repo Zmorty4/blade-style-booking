@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MediaUpload, isVideoMedia } from "@/components/admin/MediaUpload";
 import { formatPrice, formatDuration } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/services")({
@@ -32,7 +32,7 @@ function ServicesAdmin() {
       description: editing.description || null,
       price: Number(editing.price) || 0,
       duration: Number(editing.duration) || 0,
-      image_url: editing.image_url || null,
+      image_url: null,
       is_active: editing.is_active ?? true,
       sort_order: Number(editing.sort_order) || 0,
     };
@@ -55,42 +55,40 @@ function ServicesAdmin() {
 
   return (
     <div>
-      <div className="flex justify-between items-end flex-wrap gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="font-display text-[10px] tracking-[0.3em] text-gold">УСЛУГИ</div>
-          <h1 className="mt-2 font-serif text-4xl">Управление услугами</h1>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Услуги</div>
+          <h1 className="mt-2 text-4xl font-extrabold tracking-[-0.035em]">Управление услугами</h1>
+          <p className="mt-2 max-w-xl text-sm text-[#171411]/56">Фото у услуг больше не используются на сайте: только название, описание, длительность и цена.</p>
         </div>
-        <button onClick={() => setEditing({ ...EMPTY })} className="border border-gold px-6 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black transition-colors">
-          + ДОБАВИТЬ УСЛУГУ
+        <button onClick={() => setEditing({ ...EMPTY })} className="rounded-full bg-[#171411] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black">
+          + Добавить услугу
         </button>
       </div>
 
-      <div className="mt-10 grid gap-4 md:grid-cols-2">
+      <div className="mt-9 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {items.map((s) => (
-          <div key={s.id} className={`bg-card border p-6 transition-all duration-300 hover:-translate-y-1 hover:border-gold/50 ${s.is_active ? "border-divider" : "border-divider opacity-50"}`}>
-            {s.image_url && (
-              <div className="mb-5 aspect-[16/8] overflow-hidden border border-divider bg-black">
-                {isVideoMedia(s.image_url) ? (
-                  <video src={s.image_url} className="h-full w-full object-cover" muted playsInline />
-                ) : (
-                  <img src={s.image_url} alt="" className="h-full w-full object-cover" />
-                )}
+          <div key={s.id} className={`border bg-white/45 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 ${s.is_active ? "border-[#171411]/12" : "border-[#171411]/10 opacity-50"}`}>
+            <div className="flex min-h-40 flex-col justify-between">
+              <div>
+                <div className="text-2xl font-extrabold tracking-[-0.025em]">{s.name}</div>
+                <div className="mt-2 line-clamp-2 text-sm leading-6 text-[#171411]/56">{s.description}</div>
               </div>
-            )}
-            <div className="flex justify-between gap-4">
-              <div className="min-w-0">
-                <div className="font-serif text-2xl">{s.name}</div>
-                <div className="mt-1 text-sm text-foreground/60 line-clamp-2">{s.description}</div>
-                <div className="mt-4 flex gap-6">
-                  <div className="font-display text-lg text-gold">{formatPrice(s.price)}</div>
-                  <div className="font-display text-sm text-muted-foreground">{formatDuration(s.duration)}</div>
+              <div className="mt-6 flex items-end justify-between border-t border-[#171411]/10 pt-4">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#171411]/38">Цена</div>
+                  <div className="text-xl font-extrabold">{formatPrice(s.price)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#171411]/38">Длит.</div>
+                  <div className="font-bold text-[#171411]/70">{formatDuration(s.duration)}</div>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 shrink-0">
-                <button onClick={() => setEditing(s)} className="border border-divider hover:border-gold px-3 py-1.5 text-xs font-display tracking-[0.2em]">РЕД.</button>
-                <button onClick={() => toggle(s)} className="border border-divider hover:border-gold px-3 py-1.5 text-xs font-display tracking-[0.2em]">{s.is_active ? "СКРЫТЬ" : "ВКЛ"}</button>
-                <button onClick={() => del(s.id)} className="border border-divider hover:border-destructive hover:text-destructive px-3 py-1.5 text-xs font-display tracking-[0.2em]">УДАЛ.</button>
-              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <button onClick={() => setEditing(s)} className="flex-1 border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">Ред.</button>
+              <button onClick={() => toggle(s)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">{s.is_active ? "Скрыть" : "Вкл"}</button>
+              <button onClick={() => del(s.id)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-destructive hover:text-destructive">Удал.</button>
             </div>
           </div>
         ))}
@@ -98,21 +96,20 @@ function ServicesAdmin() {
 
       {editing && (
         <Modal onClose={() => setEditing(null)}>
-          <div className="font-display text-[10px] tracking-[0.3em] text-gold">{editing.id ? "РЕДАКТИРОВАНИЕ" : "НОВАЯ УСЛУГА"}</div>
-          <h2 className="mt-2 font-serif text-3xl">{editing.name || "Услуга"}</h2>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">{editing.id ? "Редактирование" : "Новая услуга"}</div>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.03em]">{editing.name || "Услуга"}</h2>
           <div className="mt-6 space-y-5">
-            <Input label="НАЗВАНИЕ" value={editing.name || ""} onChange={v => setEditing({ ...editing, name: v })} />
-            <Input label="ОПИСАНИЕ" value={editing.description || ""} onChange={v => setEditing({ ...editing, description: v })} textarea />
+            <Input label="Название" value={editing.name || ""} onChange={v => setEditing({ ...editing, name: v })} />
+            <Input label="Описание" value={editing.description || ""} onChange={v => setEditing({ ...editing, description: v })} textarea />
             <div className="grid grid-cols-2 gap-4">
-              <Input label="ЦЕНА, ₽" type="number" value={String(editing.price ?? "")} onChange={v => setEditing({ ...editing, price: Number(v) })} />
-              <Input label="ДЛИТ., МИН" type="number" value={String(editing.duration ?? "")} onChange={v => setEditing({ ...editing, duration: Number(v) })} />
+              <Input label="Цена, ₽" type="number" value={String(editing.price ?? "")} onChange={v => setEditing({ ...editing, price: Number(v) })} />
+              <Input label="Длит., мин" type="number" value={String(editing.duration ?? "")} onChange={v => setEditing({ ...editing, duration: Number(v) })} />
             </div>
-            <MediaUpload label="ФОТО ИЛИ ВИДЕО" value={editing.image_url || ""} onChange={v => setEditing({ ...editing, image_url: v })} />
-            <Input label="ПОРЯДОК" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />
+            <Input label="Порядок" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />
           </div>
           <div className="mt-8 flex justify-end gap-3">
-            <button onClick={() => setEditing(null)} className="px-6 py-2 font-display text-xs tracking-[0.25em] text-muted-foreground">ОТМЕНА</button>
-            <button onClick={save} className="border border-gold bg-gold text-black px-6 py-2 font-display text-xs tracking-[0.25em] hover:bg-gold-light">СОХРАНИТЬ</button>
+            <button onClick={() => setEditing(null)} className="px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411]/50 hover:text-[#171411]">Отмена</button>
+            <button onClick={save} className="rounded-full bg-[#171411] px-6 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black">Сохранить</button>
           </div>
         </Modal>
       )}
@@ -123,22 +120,22 @@ function ServicesAdmin() {
 export function Input({ label, value, onChange, type = "text", textarea = false }: { label: string; value: string; onChange: (v: string) => void; type?: string; textarea?: boolean }) {
   return (
     <label className="block">
-      <div className="font-display text-[10px] tracking-[0.3em] text-gold mb-2">{label}</div>
+      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">{label}</div>
       {textarea ? (
         <textarea value={value} onChange={e => onChange(e.target.value)} rows={3}
-          className="w-full bg-black border border-divider focus:border-gold outline-none p-3 text-sm resize-none transition-colors" />
+          className="w-full resize-none border border-[#171411]/15 bg-white/55 p-3 text-sm outline-none transition-colors focus:border-[#171411]" />
       ) : (
         <input type={type} value={value} onChange={e => onChange(e.target.value)}
-          className="w-full bg-black border border-divider focus:border-gold outline-none p-3 text-sm transition-colors" />
+          className="w-full border border-[#171411]/15 bg-white/55 p-3 text-sm outline-none transition-colors focus:border-[#171411]" />
       )}
     </label>
   );
 }
 
-export function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+export function Modal({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur flex items-center justify-center p-4" onClick={onClose}>
-      <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-dark border border-gold/40 p-8 animate-slide-in" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#171411]/60 p-4 backdrop-blur" onClick={onClose}>
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto border border-[#171411]/15 bg-[#f3eee5] p-7 shadow-2xl animate-slide-in" onClick={e => e.stopPropagation()}>
         {children}
       </div>
     </div>
