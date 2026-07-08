@@ -20,10 +20,10 @@ type Row = {
 };
 
 const FILTERS = [
-  { key: "all", label: "ВСЕ" },
-  { key: "new", label: "НОВЫЕ" },
-  { key: "confirmed", label: "ПОДТВЕРЖДЕНЫ" },
-  { key: "cancelled", label: "ОТМЕНЕНЫ" },
+  { key: "all", label: "Все" },
+  { key: "new", label: "Новые" },
+  { key: "confirmed", label: "Подтверждены" },
+  { key: "cancelled", label: "Отменены" },
 ];
 
 async function cleanupPastBookings() {
@@ -58,40 +58,40 @@ function BookingsAdmin() {
 
   return (
     <div>
-      <div className="flex items-end justify-between flex-wrap gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="font-display text-[10px] tracking-[0.3em] text-gold">ЗАЯВКИ</div>
-          <h1 className="mt-2 font-serif text-4xl">Записи клиентов</h1>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Заявки</div>
+          <h1 className="mt-2 text-4xl font-extrabold tracking-[-0.035em]">Записи клиентов</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {FILTERS.map(f => (
             <button key={f.key} onClick={() => setFilter(f.key)}
-              className={`px-4 py-2 font-display text-[10px] tracking-[0.25em] border transition-colors ${filter === f.key ? "bg-gold text-black border-gold" : "border-divider text-foreground/70 hover:border-gold"}`}>
+              className={`rounded-full border px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] transition-colors ${filter === f.key ? "border-[#171411] bg-[#171411] text-[#f3eee5]" : "border-[#171411]/15 text-[#171411]/65 hover:border-[#171411] hover:text-[#171411]"}`}>
               {f.label}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="mt-10 border border-divider overflow-x-auto">
-        <div className="min-w-[1100px] grid grid-cols-[100px_100px_1fr_140px_1fr_1fr_120px_160px] gap-4 px-4 py-3 border-b border-divider font-display text-[10px] tracking-[0.25em] text-muted-foreground bg-card">
-          <div>ДАТА</div><div>ВРЕМЯ</div><div>КЛИЕНТ</div><div>ТЕЛЕФОН</div><div>УСЛУГА</div><div>МАСТЕР</div><div>СТАТУС</div><div className="text-right">ДЕЙСТВИЯ</div>
+      <div className="mt-9 overflow-x-auto border border-[#171411]/12 bg-white/35">
+        <div className="grid min-w-[1100px] grid-cols-[100px_100px_1fr_140px_1fr_1fr_120px_160px] gap-4 border-b border-[#171411]/12 bg-white/55 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#171411]/45">
+          <div>Дата</div><div>Время</div><div>Клиент</div><div>Телефон</div><div>Услуга</div><div>Мастер</div><div>Статус</div><div className="text-right">Действия</div>
         </div>
-        {loading && <div className="p-8 text-center text-muted-foreground">Загрузка…</div>}
-        {!loading && rows.length === 0 && <div className="p-8 text-center text-muted-foreground">Заявок пока нет</div>}
+        {loading && <div className="p-8 text-center text-[#171411]/50">Загрузка…</div>}
+        {!loading && rows.length === 0 && <div className="p-8 text-center text-[#171411]/50">Заявок пока нет</div>}
         {rows.map((r) => (
           <div key={r.id}
-            className={`min-w-[1100px] grid grid-cols-[100px_100px_1fr_140px_1fr_1fr_120px_160px] gap-4 px-4 py-4 border-b border-divider items-center text-sm transition-colors hover:bg-card/60 ${r.status === "new" ? "border-l-2 border-l-gold" : ""}`}>
+            className={`grid min-w-[1100px] grid-cols-[100px_100px_1fr_140px_1fr_1fr_120px_160px] items-center gap-4 border-b border-[#171411]/10 px-4 py-4 text-sm transition-colors hover:bg-white/60 ${r.status === "new" ? "border-l-4 border-l-[#171411]" : ""}`}>
             <div>{new Date(r.booking_date).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" })}</div>
-            <div className="font-display text-gold">{r.booking_time.slice(0,5)}</div>
-            <div>{r.client_name}</div>
-            <div className="text-foreground/70 text-xs">{r.phone}</div>
+            <div className="font-extrabold">{r.booking_time.slice(0,5)}</div>
+            <div className="font-semibold">{r.client_name}</div>
+            <div className="text-xs text-[#171411]/62">{r.phone}</div>
             <div>{r.services?.name || "—"}</div>
-            <div className="text-foreground/70">{r.masters?.name || "Любой"}</div>
+            <div className="text-[#171411]/62">{r.masters?.name || "Любой"}</div>
             <div><StatusBadge status={r.status} /></div>
             <div className="flex justify-end gap-2">
-              {r.status !== "confirmed" && <button onClick={() => updateStatus(r.id, "confirmed")} className="px-3 py-1.5 border border-gold text-gold text-xs hover:bg-gold hover:text-black transition-colors">✓</button>}
-              {r.status !== "cancelled" && <button onClick={() => updateStatus(r.id, "cancelled")} className="px-3 py-1.5 border border-divider text-muted-foreground text-xs hover:border-destructive hover:text-destructive transition-colors">✕</button>}
+              {r.status !== "confirmed" && <button onClick={() => updateStatus(r.id, "confirmed")} className="border border-[#171411]/18 px-3 py-1.5 text-xs font-extrabold hover:border-[#171411] hover:bg-[#171411] hover:text-[#f3eee5]">✓</button>}
+              {r.status !== "cancelled" && <button onClick={() => updateStatus(r.id, "cancelled")} className="border border-[#171411]/18 px-3 py-1.5 text-xs font-extrabold text-[#171411]/60 hover:border-destructive hover:text-destructive">✕</button>}
             </div>
           </div>
         ))}
@@ -102,10 +102,10 @@ function BookingsAdmin() {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, [string, string]> = {
-    new: ["НОВАЯ", "text-gold border-gold"],
-    confirmed: ["ПОДТВ.", "text-emerald-400 border-emerald-400/60"],
-    cancelled: ["ОТМЕНА", "text-muted-foreground border-divider"],
+    new: ["НОВАЯ", "border-[#171411] bg-[#171411] text-[#f3eee5]"],
+    confirmed: ["ПОДТВ.", "border-emerald-700/45 text-emerald-800 bg-emerald-50/70"],
+    cancelled: ["ОТМЕНА", "border-[#171411]/15 text-[#171411]/50"],
   };
-  const [l, c] = map[status] || [status, "text-muted-foreground border-divider"];
-  return <span className={`inline-block px-2 py-1 border font-display text-[10px] tracking-[0.2em] ${c}`}>{l}</span>;
+  const [l, c] = map[status] || [status, "border-[#171411]/15 text-[#171411]/50"];
+  return <span className={`inline-block border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] ${c}`}>{l}</span>;
 }
