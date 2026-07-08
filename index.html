@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Gentlemen's Lounge | Barber Shop</title>
+  <meta name="description" content="A premium barber shop website inspired by The Gentlemen's Lounge in Longridge, with services, gallery, contact details, and booking call-to-action.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rye&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" data-header>
+    <a class="brand" href="#home" aria-label="The Gentlemen's Lounge home">
+      <span class="brand-mark">GL</span>
+      <span>The Gentlemen's Lounge</span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false" data-nav-toggle>
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-nav" data-nav>
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#contact">Contact</a>
+      <a class="nav-book" href="#book">Book Now</a>
+    </nav>
+  </header>
+
+  <main id="home">
+    <section class="hero" aria-label="Barber shop hero">
+      <div class="hero-media" role="img" aria-label="Classic barber chairs and warm lights"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <p class="eyebrow">Longridge Barber Shop</p>
+        <h1>The Gentlemen's Lounge</h1>
+        <p class="hero-copy">Traditional cuts, modern styling, beard trims, and a relaxed chair for every gentleman who walks through the door.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#book">Book an Appointment</a>
+          <a class="button ghost" href="#services">View Services</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro" id="about">
+      <div class="intro-image"></div>
+      <div class="intro-copy">
+        <p class="eyebrow">Welcome</p>
+        <h2>Classic craft, easy atmosphere.</h2>
+        <p>The Gentlemen's Lounge offers traditional and modern haircuts, beard trims, and sharp finishing details. Inspired by the original Longridge shop, this site keeps the vintage black-and-gold feel while giving visitors a cleaner booking path.</p>
+        <p>Walk-ins and appointments are welcome Tuesday to Saturday, with multiple barbers cutting and trimming throughout the day.</p>
+        <a class="text-link" href="#gallery">See the gallery</a>
+      </div>
+    </section>
+
+    <section class="services" id="services">
+      <div class="section-heading">
+        <p class="eyebrow">Services</p>
+        <h2>Built for the chair, not the waiting room.</h2>
+      </div>
+      <div class="service-grid">
+        <article class="service-card"><span>01</span><h3>Gent's Cut</h3><p>Clean classic trims, textured crops, skin fades, and tidy restyles.</p></article>
+        <article class="service-card"><span>02</span><h3>Beard Trim</h3><p>Shape, line-up, and finish for short stubble through full beards.</p></article>
+        <article class="service-card"><span>03</span><h3>Cut & Beard</h3><p>A complete refresh with sharp edges and a polished final look.</p></article>
+        <article class="service-card"><span>04</span><h3>Junior Cut</h3><p>Friendly cuts for younger clients, kept calm, quick, and neat.</p></article>
+      </div>
+    </section>
+
+    <section class="gallery" id="gallery">
+      <div class="section-heading narrow">
+        <p class="eyebrow">Gallery</p>
+        <h2>A warm shop with old-school character.</h2>
+      </div>
+      <div class="gallery-grid">
+        <img src="https://cdn.prod.website-files.com/5b044d009105d3778c5b7e1e/5b0464efe114c88cb2e30548_P1070371.jpg" alt="Barber shop interior">
+        <img src="https://cdn.prod.website-files.com/5b044d009105d3778c5b7e1e/5b0477a935721eb56c380f92_P1070713.jpg" alt="Barber cutting hair">
+        <img src="https://cdn.prod.website-files.com/5b044d009105d3778c5b7e1e/5b0477bc71325872424cd1ed_P1070699.jpg" alt="Classic barber tools">
+        <img src="https://cdn.prod.website-files.com/5b044d009105d3778c5b7e1e/5b0477d2f22e772ed2592698_P1070405.jpg" alt="Gentlemen's lounge detail">
+      </div>
+    </section>
+
+    <section class="booking" id="book">
+      <div>
+        <p class="eyebrow">Book Now</p>
+        <h2>Ready for the next cut?</h2>
+        <p>Use the quick contact options below to request an appointment. Replace the placeholders with your real booking link, phone, or Fresha/Booksy page.</p>
+      </div>
+      <form class="booking-form" aria-label="Booking request form">
+        <label>Name<input type="text" name="name" placeholder="Your name"></label>
+        <label>Service<select name="service"><option>Gent's Cut</option><option>Beard Trim</option><option>Cut & Beard</option><option>Junior Cut</option></select></label>
+        <label>Preferred day<input type="text" name="day" placeholder="Tuesday - Saturday"></label>
+        <button class="button primary" type="submit">Request Booking</button>
+        <p class="form-note" data-form-note></p>
+      </form>
+    </section>
+
+    <section class="contact" id="contact">
+      <div><p class="eyebrow">Contact</p><h2>Find the shop</h2></div>
+      <div class="contact-list">
+        <p><strong>Address</strong><br>Longridge, Lancashire</p>
+        <p><strong>Opening</strong><br>Tuesday - Saturday</p>
+        <p><strong>Phone</strong><br><a href="tel:+440000000000">+44 0000 000000</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Copyright 2026 The Gentlemen's Lounge. All rights reserved.</p>
+    <a href="#home">Back to top</a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
