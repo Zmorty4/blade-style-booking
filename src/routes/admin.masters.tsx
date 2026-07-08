@@ -80,7 +80,7 @@ function MastersAdmin() {
             <Input label="Имя" value={editing.name || ""} onChange={v => setEditing({ ...editing, name: v })} />
             <Input label="Специализация" value={editing.speciality || ""} onChange={v => setEditing({ ...editing, speciality: v })} />
             <Input label="Опыт" value={editing.experience || ""} onChange={v => setEditing({ ...editing, experience: v })} />
-            <MediaUpload label="Фото или видео" value={editing.photo_url || ""} onChange={v => setEditing({ ...editing, photo_url: v })} />
+            <MediaUpload label="Аватар мастера" value={editing.photo_url || ""} onChange={v => setEditing({ ...editing, photo_url: v })} accept="image/*" />
           </div>
           <div className="mt-8 flex justify-end gap-3">
             <button onClick={() => setEditing(null)} className="px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411]/50 hover:text-[#171411]">Отмена</button>
