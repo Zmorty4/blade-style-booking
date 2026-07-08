@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site/SiteHeader";
@@ -189,98 +190,80 @@ function BookingPage() {
   const steps = ["Услуга", "Мастер", "Дата", "Время", "Данные"];
 
   return (
-    <div className="min-h-screen bg-black text-foreground">
+    <div className="min-h-screen bg-[#f3eee5] text-[#171411]">
       <SiteHeader />
-      <div className="pt-32 pb-24">
-        <div className="mx-auto max-w-4xl px-6">
-          <Link to="/" className="font-display text-[10px] tracking-[0.3em] text-muted-foreground hover:text-gold">← НА ГЛАВНУЮ</Link>
-          <h1 className="mt-4 font-serif text-4xl md:text-6xl">Онлайн-запись</h1>
+      <div className="px-5 pb-20 pt-32 md:pt-36">
+        <div className="mx-auto max-w-6xl">
+          <Link to="/" className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/50 hover:text-[#171411]">← На главную</Link>
+          <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_320px] lg:items-end">
+            <div>
+              <div className="inline-flex rounded-full border border-[#171411]/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#171411]/62">Online booking</div>
+              <h1 className="mt-5 max-w-3xl text-4xl font-extrabold leading-[1.02] tracking-[-0.035em] md:text-6xl">Запись без звонков и ожидания.</h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-[#171411]/62">Выбранные пункты теперь выделяются тёмным фоном и галочкой, чтобы сразу было понятно, что уже выбрано.</p>
+            </div>
+            {step <= 5 && <Summary service={service} master={master} date={date} time={time} compact />}
+          </div>
 
           {step <= 5 && (
             <>
-              <div className="mt-10 flex items-center gap-2">
+              <div className="mt-10 grid gap-2 sm:grid-cols-5">
                 {steps.map((label, i) => {
                   const n = i + 1;
                   const active = n === step;
                   const done = n < step;
                   return (
-                    <div key={label} className="flex-1">
-                      <div className={`h-[2px] ${done || active ? "bg-gold" : "bg-divider"} transition-colors`} />
-                      <div className={`mt-2 font-display text-[10px] tracking-[0.25em] ${active ? "text-gold" : done ? "text-foreground/70" : "text-muted-foreground"}`}>
-                        {String(n).padStart(2, "0")} · {label.toUpperCase()}
-                      </div>
-                    </div>
+                    <button key={label} onClick={() => done && setStep(n)} className={`rounded-full border px-3 py-3 text-left transition-colors ${active ? "border-[#171411] bg-[#171411] text-[#f3eee5]" : done ? "border-[#171411]/25 bg-white/45 text-[#171411] hover:border-[#171411]" : "border-[#171411]/12 text-[#171411]/45"}`}>
+                      <div className="text-[10px] font-extrabold uppercase tracking-[0.18em]">{String(n).padStart(2, "0")}</div>
+                      <div className="mt-1 text-sm font-extrabold">{label}</div>
+                    </button>
                   );
                 })}
               </div>
 
-              <div key={step} className="mt-12 animate-slide-in">
+              <div key={step} className="mt-10 animate-slide-in">
                 {step === 1 && (
                   <div className="grid gap-4 md:grid-cols-2">
-                    {services.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => setService(s)}
-                        className={`text-left bg-card border p-6 transition-all duration-300 hover:-translate-y-1 ${service?.id === s.id ? "border-gold" : "border-divider hover:border-gold/50"}`}
-                      >
-                        <div className="font-serif text-2xl">{s.name}</div>
-                        <div className="mt-4 flex justify-between items-end">
-                          <div className="font-display text-xl text-gold">{formatPrice(s.price)}</div>
-                          <div className="font-display text-sm text-muted-foreground">{formatDuration(s.duration)}</div>
-                        </div>
-                      </button>
-                    ))}
+                    {services.map((s) => <ServiceOption key={s.id} item={s} selected={service?.id === s.id} onClick={() => setService(s)} />)}
                   </div>
                 )}
                 {step === 2 && (
-                  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                    {masters.map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => { setMaster(m); setDate(null); setTime(null); }}
-                        className={`text-left bg-card border p-6 transition-all duration-300 hover:-translate-y-1 ${master?.id === m.id ? "border-gold" : "border-divider hover:border-gold/50"}`}
-                      >
-                        <div className="font-serif text-xl">{m.name}</div>
-                        <div className="mt-1 text-sm text-foreground/60">{m.speciality}</div>
-                      </button>
-                    ))}
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {masters.map((m) => <MasterOption key={m.id} item={m} selected={master?.id === m.id} onClick={() => { setMaster(m); setDate(null); setTime(null); }} />)}
                   </div>
                 )}
                 {step === 3 && <CalendarPicker value={date} month={month} unavailableDates={unavailableDates} onMonthChange={setMonth} onChange={(d) => { setDate(d); setTime(null); }} />}
-                {step === 4 && (
-                  <TimeGrid busyTimes={busyTimes} value={time} onChange={setTime} />
-                )}
+                {step === 4 && <TimeGrid busyTimes={busyTimes} value={time} onChange={setTime} />}
                 {step === 5 && (
-                  <div className="grid gap-8 md:grid-cols-[1fr_320px]">
-                    <div className="space-y-6">
-                      <Field label="ВАШЕ ИМЯ">
-                        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Александр" className="w-full bg-transparent border-b border-divider focus:border-gold outline-none py-3 text-lg" />
+                  <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
+                    <div className="space-y-6 border border-[#171411]/12 bg-white/35 p-5 md:p-7">
+                      <Field label="Ваше имя">
+                        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Александр" className="w-full border-b border-[#171411]/18 bg-transparent py-3 text-lg outline-none focus:border-[#171411]" />
                       </Field>
-                      <Field label="ТЕЛЕФОН">
-                        <input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} className="w-full bg-transparent border-b border-divider focus:border-gold outline-none py-3 text-lg font-mono" />
+                      <Field label="Телефон">
+                        <input value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} className="w-full border-b border-[#171411]/18 bg-transparent py-3 font-mono text-lg outline-none focus:border-[#171411]" />
                       </Field>
-                      <Field label="КОММЕНТАРИЙ (НЕОБЯЗАТЕЛЬНО)">
-                        <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} maxLength={500} placeholder="Пожелания к стрижке" className="w-full bg-transparent border border-divider focus:border-gold outline-none p-3 text-sm resize-none" />
+                      <Field label="Комментарий, необязательно">
+                        <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} maxLength={500} placeholder="Пожелания к стрижке" className="w-full resize-none border border-[#171411]/18 bg-transparent p-3 text-sm outline-none focus:border-[#171411]" />
                       </Field>
-                      {error && <div className="text-destructive text-sm">{error}</div>}
+                      {error && <div className="border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
                     </div>
                     <Summary service={service} master={master} date={date} time={time} />
                   </div>
                 )}
               </div>
 
-              <div className="mt-12 flex justify-between border-t border-divider pt-6">
-                <button onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="font-display text-xs tracking-[0.25em] text-foreground/60 hover:text-gold disabled:opacity-30">
-                  ← НАЗАД
+              <div className="mt-10 flex items-center justify-between border-t border-[#171411]/12 pt-6">
+                <button onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="rounded-full border border-[#171411]/20 px-5 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411] hover:border-[#171411] disabled:opacity-30">
+                  ← Назад
                 </button>
                 {step < 5 ? (
-                  <button onClick={() => setStep((s) => s + 1)} disabled={!canNext} className="border border-gold px-8 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gold transition-colors">
-                    ДАЛЕЕ →
+                  <button onClick={() => setStep((s) => s + 1)} disabled={!canNext} className="rounded-full bg-[#171411] px-7 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black disabled:opacity-35">
+                    Далее →
                   </button>
                 ) : (
-                  <button onClick={submit} disabled={!canNext || submitting} className="border border-gold bg-gold text-black px-8 py-3 font-display text-xs tracking-[0.25em] hover:bg-gold-light disabled:opacity-40 transition-colors flex items-center gap-3">
+                  <button onClick={submit} disabled={!canNext || submitting} className="flex items-center gap-3 rounded-full bg-[#171411] px-7 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black disabled:opacity-35">
                     {submitting && <Spinner />}
-                    ПОДТВЕРДИТЬ ЗАПИСЬ
+                    Подтвердить запись
                   </button>
                 )}
               </div>
@@ -288,15 +271,15 @@ function BookingPage() {
           )}
 
           {step === 6 && (
-            <div className="mt-16 text-center animate-slide-in">
-              <div className="mx-auto w-24 h-24 border-2 border-gold flex items-center justify-center">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-12 h-12 text-gold"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <div className="mx-auto mt-16 max-w-xl text-center animate-slide-in">
+              <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[#171411] text-[#f3eee5]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-12 w-12"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
               </div>
-              <h2 className="mt-8 font-serif text-5xl">Вы записаны!</h2>
-              <p className="mt-4 text-foreground/70">Мы перезвоним для подтверждения в ближайшее время.</p>
-              <div className="mt-10 max-w-md mx-auto text-left"><Summary service={service} master={master} date={date} time={time} /></div>
-              <button onClick={() => navigate({ to: "/" })} className="mt-10 border border-gold px-10 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black transition-colors">
-                НА ГЛАВНУЮ
+              <h2 className="mt-8 text-5xl font-extrabold tracking-[-0.035em]">Вы записаны!</h2>
+              <p className="mt-4 text-[#171411]/65">Мы перезвоним для подтверждения в ближайшее время.</p>
+              <div className="mt-10 text-left"><Summary service={service} master={master} date={date} time={time} /></div>
+              <button onClick={() => navigate({ to: "/" })} className="mt-10 rounded-full bg-[#171411] px-8 py-4 text-sm font-extrabold text-[#f3eee5] hover:bg-black">
+                На главную
               </button>
             </div>
           )}
@@ -306,26 +289,59 @@ function BookingPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="block"><div className="font-display text-[10px] tracking-[0.3em] text-gold mb-2">{label}</div>{children}</label>;
-}
-function Spinner() { return <span className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />; }
-
-function Summary({ service, master, date, time }: { service: Service | null; master: Master | null; date: Date | null; time: string | null }) {
+function ServiceOption({ item, selected, onClick }: { item: Service; selected: boolean; onClick: () => void }) {
   return (
-    <div className="bg-card border border-gold/40 p-6">
-      <div className="font-display text-[10px] tracking-[0.3em] text-gold">ВАША ЗАПИСЬ</div>
+    <button onClick={onClick} className={`relative min-h-44 border p-5 text-left transition-all duration-300 hover:-translate-y-1 ${selected ? "border-[#171411] bg-[#171411] text-[#f3eee5] shadow-xl" : "border-[#171411]/12 bg-white/35 text-[#171411] hover:border-[#171411]/35 hover:bg-white/75"}`}>
+      {selected && <SelectedMark />}
+      <h3 className="pr-16 text-2xl font-extrabold tracking-[-0.025em]">{item.name}</h3>
+      <div className={`mt-8 flex items-end justify-between border-t pt-4 ${selected ? "border-[#f3eee5]/18" : "border-[#171411]/10"}`}>
+        <div>
+          <div className={`text-[10px] font-bold uppercase tracking-[0.2em] ${selected ? "text-[#f3eee5]/50" : "text-[#171411]/38"}`}>Длительность</div>
+          <div className="mt-1 font-bold">{formatDuration(item.duration)}</div>
+        </div>
+        <div className="text-right">
+          <div className={`text-[10px] font-bold uppercase tracking-[0.2em] ${selected ? "text-[#f3eee5]/50" : "text-[#171411]/38"}`}>Цена</div>
+          <div className="mt-1 text-2xl font-extrabold">{formatPrice(item.price)}</div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function MasterOption({ item, selected, onClick }: { item: Master; selected: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className={`relative min-h-36 border p-5 text-left transition-all duration-300 hover:-translate-y-1 ${selected ? "border-[#171411] bg-[#171411] text-[#f3eee5] shadow-xl" : "border-[#171411]/12 bg-white/35 text-[#171411] hover:border-[#171411]/35 hover:bg-white/75"}`}>
+      {selected && <SelectedMark />}
+      <div className="pr-16 text-2xl font-extrabold tracking-[-0.025em]">{item.name}</div>
+      <div className={`mt-2 text-sm ${selected ? "text-[#f3eee5]/62" : "text-[#171411]/58"}`}>{item.speciality}</div>
+    </button>
+  );
+}
+
+function SelectedMark() {
+  return <div className="absolute right-4 top-4 rounded-full bg-[#f3eee5] px-3 py-1 text-xs font-extrabold uppercase tracking-[0.14em] text-[#171411]">✓ Выбрано</div>;
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return <label className="block"><div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">{label}</div>{children}</label>;
+}
+function Spinner() { return <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#f3eee5] border-t-transparent" />; }
+
+function Summary({ service, master, date, time, compact = false }: { service: Service | null; master: Master | null; date: Date | null; time: string | null; compact?: boolean }) {
+  return (
+    <div className={`border border-[#171411]/14 bg-white/45 ${compact ? "p-4" : "p-6"}`}>
+      <div className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">Ваша запись</div>
       <div className="mt-4 space-y-3 text-sm">
         <Row k="Услуга" v={service?.name} />
         <Row k="Мастер" v={master?.name} />
         <Row k="Дата" v={date ? date.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) : undefined} />
         <Row k="Время" v={time || undefined} />
-        {service && <div className="pt-3 mt-3 border-t border-divider flex justify-between"><span className="text-muted-foreground">Итого</span><span className="font-display text-xl text-gold">{formatPrice(service.price)}</span></div>}
+        {service && <div className="mt-3 flex justify-between border-t border-[#171411]/10 pt-3"><span className="text-[#171411]/50">Итого</span><span className="text-xl font-extrabold text-[#171411]">{formatPrice(service.price)}</span></div>}
       </div>
     </div>
   );
 }
-function Row({ k, v }: { k: string; v?: string }) { return <div className="flex justify-between gap-3"><span className="text-muted-foreground">{k}</span><span className="text-foreground/90 text-right">{v || "—"}</span></div>; }
+function Row({ k, v }: { k: string; v?: string }) { return <div className="flex justify-between gap-3"><span className="text-[#171411]/50">{k}</span><span className="text-right font-semibold text-[#171411]">{v || "—"}</span></div>; }
 
 function CalendarPicker({ value, month, unavailableDates, onMonthChange, onChange }: { value: Date | null; month: Date; unavailableDates: string[]; onMonthChange: (d: Date) => void; onChange: (d: Date) => void }) {
   const today = new Date(); today.setHours(0,0,0,0);
@@ -337,14 +353,14 @@ function CalendarPicker({ value, month, unavailableDates, onMonthChange, onChang
   for (let i = 1; i <= daysInMonth; i++) cells.push(new Date(month.getFullYear(), month.getMonth(), i));
 
   return (
-    <div className="bg-card border border-divider p-6 max-w-md mx-auto">
+    <div className="mx-auto max-w-md border border-[#171411]/12 bg-white/45 p-5 md:p-6">
       <div className="flex items-center justify-between">
-        <button onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth()-1, 1))} className="text-gold hover:text-gold-light font-display">←</button>
-        <div className="font-serif text-xl capitalize">{month.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}</div>
-        <button onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth()+1, 1))} className="text-gold hover:text-gold-light font-display">→</button>
+        <button onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth()-1, 1))} className="flex h-10 w-10 items-center justify-center rounded-full border border-[#171411]/20 text-[#171411] hover:border-[#171411]">←</button>
+        <div className="text-xl font-extrabold capitalize tracking-[-0.025em]">{month.toLocaleDateString("ru-RU", { month: "long", year: "numeric" })}</div>
+        <button onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth()+1, 1))} className="flex h-10 w-10 items-center justify-center rounded-full border border-[#171411]/20 text-[#171411] hover:border-[#171411]">→</button>
       </div>
       <div className="mt-6 grid grid-cols-7 gap-1 text-center">
-        {["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(d => <div key={d} className="font-display text-[10px] tracking-[0.2em] text-muted-foreground py-2">{d}</div>)}
+        {["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(d => <div key={d} className="py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#171411]/38">{d}</div>)}
         {cells.map((d, i) => {
           if (!d) return <div key={i} />;
           const key = dateKey(d);
@@ -355,26 +371,26 @@ function CalendarPicker({ value, month, unavailableDates, onMonthChange, onChang
           const selected = value && d.toDateString() === value.toDateString();
           return (
             <button key={i} disabled={disabled} onClick={() => onChange(d)} title={fullyBooked ? "Все часы заняты" : undefined}
-              className={`aspect-square text-sm transition-colors ${selected ? "bg-gold text-black" : disabled ? "bg-divider/30 text-muted-foreground/35 cursor-not-allowed line-through" : "text-foreground hover:bg-gold/20"}`}>
+              className={`aspect-square text-sm font-bold transition-colors ${selected ? "bg-[#171411] text-[#f3eee5]" : disabled ? "bg-[#171411]/8 text-[#171411]/24 cursor-not-allowed line-through" : "text-[#171411] hover:bg-[#171411]/10"}`}>
               {d.getDate()}
             </button>
           );
         })}
       </div>
-      <div className="mt-4 font-display text-[10px] tracking-[0.25em] text-muted-foreground text-center">СЕРЫЕ ДАТЫ НЕДОСТУПНЫ</div>
+      <div className="mt-4 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-[#171411]/38">Серые даты недоступны</div>
     </div>
   );
 }
 
 function TimeGrid({ busyTimes, value, onChange }: { busyTimes: string[]; value: string | null; onChange: (t: string) => void }) {
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 max-w-2xl mx-auto">
+    <div className="mx-auto grid max-w-2xl grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
       {SLOTS.map((t) => {
         const busy = busyTimes.includes(t);
         const sel = value === t;
         return (
           <button key={t} disabled={busy} onClick={() => onChange(t)} title={busy ? "Время уже занято" : undefined}
-            className={`py-3 font-display text-sm tracking-[0.15em] border transition-colors ${sel ? "bg-gold text-black border-gold" : busy ? "bg-divider/30 border-divider text-muted-foreground/40 cursor-not-allowed line-through" : "border-divider text-foreground hover:border-gold hover:text-gold"}`}>
+            className={`border py-3 text-sm font-extrabold tracking-[0.1em] transition-colors ${sel ? "border-[#171411] bg-[#171411] text-[#f3eee5]" : busy ? "border-[#171411]/10 bg-[#171411]/8 text-[#171411]/28 cursor-not-allowed line-through" : "border-[#171411]/14 bg-white/35 text-[#171411] hover:border-[#171411] hover:bg-white/75"}`}>
             {t}
           </button>
         );
