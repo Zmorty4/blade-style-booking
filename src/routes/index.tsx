@@ -30,13 +30,21 @@ function MediaFrame({ src, fallback, alt, className = "" }: { src?: string | nul
   return <img src={media} alt={alt} className={className} />;
 }
 
+async function cleanupPastBookings() {
+  try {
+    await (supabase as any).rpc("cleanup_past_bookings");
+  } catch {
+    // Landing should stay available even if background cleanup fails.
+  }
+}
+
 function Landing() {
   const [services, setServices] = useState<Service[]>([]);
   const [masters, setMasters] = useState<Master[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
 
   useEffect(() => {
-    (supabase as any).rpc("cleanup_past_bookings").catch(() => {});
+    void cleanupPastBookings();
     (async () => {
       const [s, m, cfg] = await Promise.all([
         supabase.from("services").select("id,name,description,price,duration,image_url").eq("is_active", true).order("sort_order"),
@@ -77,7 +85,7 @@ function Landing() {
               Стиль без<br />
               <span className="italic text-gold-light">лишнего шума</span>
             </h1>
-            <p className="mt-8 text-base md:text-lg text-foreground/72 max-w-xl leading-8">
+            <p className="mt-8 text-base md:text-lg text-foreground/70 max-w-xl leading-8">
               {tagline}. Чистая форма, уверенный контур и запись онлайн без звонков.
             </p>
             <div className="mt-12 flex flex-wrap items-center gap-6">
@@ -117,7 +125,7 @@ function Landing() {
       <Section id="how" label="ПРОЦЕСС" title="Как это работает" subtitle="Четыре коротких шага, и кресло забронировано.">
         <div className="grid gap-8 md:grid-cols-4 relative">
           {[["01", "Выбери услугу"], ["02", "Выбери мастера"], ["03", "Выбери время"], ["04", "Приходи"]].map(([n, t], i) => (
-            <div key={n} className="relative hover-lift hover:hover-lift-active">
+            <div key={n} className="relative transition-transform duration-300 hover:-translate-y-1">
               <div className="font-display text-5xl text-gold">{n}</div>
               <div className="mt-6 h-px bg-gold/30" />
               <div className="mt-4 font-serif text-2xl">{t}</div>
