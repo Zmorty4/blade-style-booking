@@ -292,11 +292,24 @@ function ServiceOption({ item, selected, onClick }: { item: Service; selected: b
 }
 
 function MasterOption({ item, selected, onClick }: { item: Master; selected: boolean; onClick: () => void }) {
+  const initials = item.id === "any" ? "*" : item.name.trim().slice(0, 1).toUpperCase();
+
   return (
     <button onClick={onClick} className={`relative min-h-36 border p-5 text-left transition-all duration-300 hover:-translate-y-1 ${selected ? "border-[#171411] bg-[#171411] text-[#f3eee5] shadow-xl" : "border-[#171411]/12 bg-white/35 text-[#171411] hover:border-[#171411]/35 hover:bg-white/75"}`}>
       {selected && <SelectedMark />}
-      <div className="pr-16 text-2xl font-extrabold tracking-[-0.025em]">{item.name}</div>
-      <div className={`mt-2 text-sm ${selected ? "text-[#f3eee5]/62" : "text-[#171411]/58"}`}>{item.speciality}</div>
+      <div className="flex items-center gap-4 pr-16">
+        <div className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border ${selected ? "border-[#f3eee5]/35 bg-[#f3eee5]/12 text-[#f3eee5]" : "border-[#171411]/15 bg-[#171411]/8 text-[#171411]"}`}>
+          {item.photo_url ? (
+            <img src={item.photo_url} alt={item.name} className="h-full w-full object-cover grayscale" />
+          ) : (
+            <span className="text-lg font-extrabold">{initials}</span>
+          )}
+        </div>
+        <div className="min-w-0">
+          <div className="text-2xl font-extrabold tracking-[-0.025em]">{item.name}</div>
+          <div className={`mt-2 text-sm ${selected ? "text-[#f3eee5]/62" : "text-[#171411]/58"}`}>{item.speciality}</div>
+        </div>
+      </div>
     </button>
   );
 }
