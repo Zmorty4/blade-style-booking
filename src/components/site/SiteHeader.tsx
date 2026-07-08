@@ -20,7 +20,7 @@ export function SiteHeader({ shopName = "BLADE & STYLE" }: { shopName?: string }
   ];
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? "border-b border-[#171411]/10 bg-[#f3eee5]/92 backdrop-blur-xl" : "bg-transparent"}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? "border-b border-[#171411]/10 bg-[#f3eee5]/90 backdrop-blur-xl" : "bg-transparent"}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
         <Link to="/" className="leading-none text-[#171411] transition-opacity hover:opacity-70" onClick={() => setOpen(false)}>
           <span className="block text-xl font-extrabold uppercase tracking-[-0.04em] sm:text-2xl">{shopName}</span>
