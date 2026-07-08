@@ -16,6 +16,8 @@ type Master = { id: string; name: string; speciality: string | null; experience:
 type Work = { id: string; title: string; description: string | null; image_url: string | null };
 type Settings = { shop_name: string | null; tagline: string | null; phone: string | null; address: string | null; working_hours: string | null; instagram: string | null; hero_image_url: string | null };
 
+type RailRef = RefObject<HTMLDivElement | null>;
+
 const HERO_FALLBACK = "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1800&q=80";
 const MASTER_FALLBACK = "https://images.unsplash.com/photo-1503443207922-dff7d543fd0e?auto=format&fit=crop&w=900&q=80";
 const WORK_FALLBACKS = [
@@ -237,7 +239,7 @@ function Info({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
-function scrollRail(ref: RefObject<HTMLDivElement>, direction: -1 | 1) {
+function scrollRail(ref: RailRef, direction: -1 | 1) {
   const el = ref.current;
   if (!el) return;
   el.scrollBy({ left: direction * Math.min(el.clientWidth * 0.88, 620), behavior: "smooth" });
@@ -278,7 +280,7 @@ function SectionHeading({ label, title, subtitle }: { label: string; title: stri
   );
 }
 
-function PhotoSection({ id, label, title, subtitle, railRef, children }: { id: string; label: string; title: string; subtitle: string; railRef: RefObject<HTMLDivElement>; children: ReactNode }) {
+function PhotoSection({ id, label, title, subtitle, railRef, children }: { id: string; label: string; title: string; subtitle: string; railRef: RailRef; children: ReactNode }) {
   const { ref, visible } = useReveal<HTMLDivElement>();
   return (
     <section id={id} className="relative bg-[#171411] px-5 py-20 text-[#f3eee5] md:py-28">
