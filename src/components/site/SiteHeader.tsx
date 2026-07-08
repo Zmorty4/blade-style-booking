@@ -12,7 +12,7 @@ export function SiteHeader({ shopName = "BLADE & STYLE" }: { shopName?: string }
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled ? "border-b border-divider bg-black/82 backdrop-blur-xl" : "bg-transparent"
+        scrolled ? "border-b border-divider bg-black/85 backdrop-blur-xl" : "bg-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
@@ -26,7 +26,7 @@ export function SiteHeader({ shopName = "BLADE & STYLE" }: { shopName?: string }
             { href: "#how", label: "Процесс" },
             { href: "#contacts", label: "Контакты" },
           ].map((l) => (
-            <a key={l.href} href={l.href} className="font-display text-xs text-foreground/76 hover:text-gold transition-colors tracking-[0.2em]">
+            <a key={l.href} href={l.href} className="font-display text-xs text-foreground/75 hover:text-gold transition-colors tracking-[0.2em]">
               {l.label}
             </a>
           ))}
