@@ -59,32 +59,32 @@ function WorksAdmin() {
 
   return (
     <div>
-      <div className="flex justify-between items-end flex-wrap gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="font-display text-[10px] tracking-[0.3em] text-gold">НАШИ РАБОТЫ</div>
-          <h1 className="mt-2 font-serif text-4xl">Портфолио</h1>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Наши работы</div>
+          <h1 className="mt-2 text-4xl font-extrabold tracking-[-0.035em]">Портфолио</h1>
         </div>
-        <button onClick={() => setEditing({ ...EMPTY })} className="border border-gold px-6 py-3 font-display text-xs tracking-[0.25em] text-gold hover:bg-gold hover:text-black transition-colors">
-          + ДОБАВИТЬ РАБОТУ
+        <button onClick={() => setEditing({ ...EMPTY })} className="rounded-full bg-[#171411] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black">
+          + Добавить работу
         </button>
       </div>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
-          <div key={item.id} className={`bg-card border p-5 transition-all duration-300 hover:-translate-y-1 hover:border-gold/50 ${item.is_active ? "border-divider" : "border-divider opacity-50"}`}>
-            <div className="aspect-[4/5] overflow-hidden border border-divider bg-black">
+          <div key={item.id} className={`border bg-white/45 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 ${item.is_active ? "border-[#171411]/12" : "border-[#171411]/10 opacity-50"}`}>
+            <div className="aspect-[4/5] overflow-hidden border border-[#171411]/10 bg-[#171411]/8">
               {item.image_url ? (
-                isVideoMedia(item.image_url) ? <video src={item.image_url} className="h-full w-full object-cover" muted playsInline /> : <img src={item.image_url} alt="" className="h-full w-full object-cover" />
-              ) : <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Нет фото</div>}
+                isVideoMedia(item.image_url) ? <video src={item.image_url} className="h-full w-full object-cover grayscale" muted playsInline /> : <img src={item.image_url} alt="" className="h-full w-full object-cover grayscale" />
+              ) : <div className="flex h-full items-center justify-center text-sm text-[#171411]/45">Нет фото</div>}
             </div>
             <div className="mt-5">
-              <div className="font-serif text-2xl">{item.title}</div>
-              <div className="mt-1 min-h-10 text-sm text-foreground/60 line-clamp-2">{item.description}</div>
+              <div className="text-2xl font-extrabold tracking-[-0.025em]">{item.title}</div>
+              <div className="mt-1 min-h-10 line-clamp-2 text-sm text-[#171411]/56">{item.description}</div>
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
-              <button onClick={() => setEditing(item)} className="flex-1 border border-divider hover:border-gold px-3 py-2 text-xs font-display tracking-[0.2em]">РЕДАКТ.</button>
-              <button onClick={() => toggle(item)} className="border border-divider hover:border-gold px-3 py-2 text-xs font-display tracking-[0.2em]">{item.is_active ? "СКРЫТЬ" : "ВКЛ"}</button>
-              <button onClick={() => del(item.id)} className="border border-divider hover:border-destructive hover:text-destructive px-3 py-2 text-xs font-display tracking-[0.2em]">УДАЛ.</button>
+              <button onClick={() => setEditing(item)} className="flex-1 border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">Редакт.</button>
+              <button onClick={() => toggle(item)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">{item.is_active ? "Скрыть" : "Вкл"}</button>
+              <button onClick={() => del(item.id)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-destructive hover:text-destructive">Удал.</button>
             </div>
           </div>
         ))}
@@ -92,17 +92,17 @@ function WorksAdmin() {
 
       {editing && (
         <Modal onClose={() => setEditing(null)}>
-          <div className="font-display text-[10px] tracking-[0.3em] text-gold">{editing.id ? "РЕДАКТИРОВАНИЕ" : "НОВАЯ РАБОТА"}</div>
-          <h2 className="mt-2 font-serif text-3xl">{editing.title || "Работа"}</h2>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">{editing.id ? "Редактирование" : "Новая работа"}</div>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.03em]">{editing.title || "Работа"}</h2>
           <div className="mt-6 space-y-5">
-            <Input label="НАЗВАНИЕ" value={editing.title || ""} onChange={v => setEditing({ ...editing, title: v })} />
-            <Input label="ОПИСАНИЕ" value={editing.description || ""} onChange={v => setEditing({ ...editing, description: v })} textarea />
-            <MediaUpload label="ФОТО ИЛИ ВИДЕО" value={editing.image_url || ""} onChange={v => setEditing({ ...editing, image_url: v })} />
-            <Input label="ПОРЯДОК" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />
+            <Input label="Название" value={editing.title || ""} onChange={v => setEditing({ ...editing, title: v })} />
+            <Input label="Описание" value={editing.description || ""} onChange={v => setEditing({ ...editing, description: v })} textarea />
+            <MediaUpload label="Фото или видео" value={editing.image_url || ""} onChange={v => setEditing({ ...editing, image_url: v })} />
+            <Input label="Порядок" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />
           </div>
           <div className="mt-8 flex justify-end gap-3">
-            <button onClick={() => setEditing(null)} className="px-6 py-2 font-display text-xs tracking-[0.25em] text-muted-foreground">ОТМЕНА</button>
-            <button onClick={save} className="border border-gold bg-gold text-black px-6 py-2 font-display text-xs tracking-[0.25em] hover:bg-gold-light">СОХРАНИТЬ</button>
+            <button onClick={() => setEditing(null)} className="px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411]/50 hover:text-[#171411]">Отмена</button>
+            <button onClick={save} className="rounded-full bg-[#171411] px-6 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black">Сохранить</button>
           </div>
         </Modal>
       )}
