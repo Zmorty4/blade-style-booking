@@ -26,6 +26,14 @@ const FILTERS = [
   { key: "cancelled", label: "ОТМЕНЕНЫ" },
 ];
 
+async function cleanupPastBookings() {
+  try {
+    await (supabase as any).rpc("cleanup_past_bookings");
+  } catch {
+    // Cleanup is helpful, but the admin table should still load if it fails.
+  }
+}
+
 function BookingsAdmin() {
   const [rows, setRows] = useState<Row[]>([]);
   const [filter, setFilter] = useState("all");
@@ -33,7 +41,7 @@ function BookingsAdmin() {
 
   async function load() {
     setLoading(true);
-    await (supabase as any).rpc("cleanup_past_bookings").catch(() => {});
+    await cleanupPastBookings();
     let q = supabase.from("bookings").select("*, services(name), masters(name)").order("booking_date", { ascending: true }).order("booking_time", { ascending: true });
     if (filter !== "all") q = q.eq("status", filter);
     const { data } = await q;
