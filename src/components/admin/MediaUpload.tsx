@@ -53,8 +53,8 @@ export function MediaUpload({
 
   return (
     <div>
-      <div className="font-display text-[10px] tracking-[0.3em] text-gold mb-2">{label}</div>
-      <label className="group flex min-h-32 cursor-pointer flex-col items-center justify-center border border-dashed border-divider bg-black p-4 text-center transition-colors hover:border-gold">
+      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">{label}</div>
+      <label className="group flex min-h-32 cursor-pointer flex-col items-center justify-center border border-dashed border-[#171411]/18 bg-white/45 p-4 text-center transition-colors hover:border-[#171411] hover:bg-white/70">
         <input
           type="file"
           accept={accept}
@@ -64,7 +64,7 @@ export function MediaUpload({
         />
         {value ? (
           <div className="w-full">
-            <div className="mx-auto max-h-44 overflow-hidden border border-divider bg-card">
+            <div className="mx-auto max-h-44 overflow-hidden border border-[#171411]/12 bg-[#171411]/8">
               {isVideoUrl(value) ? (
                 <video src={value} className="h-44 w-full object-cover" controls muted />
               ) : (
@@ -72,13 +72,13 @@ export function MediaUpload({
               )}
             </div>
             <div className="mt-3 flex items-center justify-center gap-3">
-              <span className="font-display text-[10px] tracking-[0.25em] text-muted-foreground group-hover:text-gold">
-                ЗАМЕНИТЬ ФАЙЛ
+              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#171411]/48 group-hover:text-[#171411]">
+                Заменить файл
               </span>
               <button
                 type="button"
                 onClick={(event) => { event.preventDefault(); onChange(""); }}
-                className="inline-flex h-8 w-8 items-center justify-center border border-divider text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
+                className="inline-flex h-8 w-8 items-center justify-center border border-[#171411]/15 text-[#171411]/50 transition-colors hover:border-destructive hover:text-destructive"
                 title="Удалить файл из формы"
               >
                 <X className="h-4 w-4" />
@@ -86,10 +86,10 @@ export function MediaUpload({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-3 text-muted-foreground group-hover:text-gold">
+          <div className="flex flex-col items-center gap-3 text-[#171411]/50 group-hover:text-[#171411]">
             <Upload className="h-6 w-6" />
-            <span className="font-display text-[10px] tracking-[0.25em]">
-              {uploading ? "ЗАГРУЗКА..." : "ЗАГРУЗИТЬ ФОТО ИЛИ ВИДЕО"}
+            <span className="text-[10px] font-bold uppercase tracking-[0.18em]">
+              {uploading ? "Загрузка..." : "Загрузить фото или видео"}
             </span>
           </div>
         )}
