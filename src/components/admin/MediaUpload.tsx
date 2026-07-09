@@ -13,6 +13,19 @@ const ALLOWED_IMAGE_TYPES = new Set([
   "image/heif",
 ]);
 const ALLOWED_VIDEO_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
+const EXTENSION_TYPES: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  avif: "image/avif",
+  heic: "image/heic",
+  heif: "image/heif",
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mov: "video/quicktime",
+};
 
 function isVideoUrl(url: string) {
   return /\.(mp4|webm|mov)(\?|$)/i.test(url);
@@ -60,20 +73,23 @@ export const MediaUpload = memo(function MediaUpload({
     setError("");
 
     try {
-      const acceptedTypes = accept.startsWith("image/") ? ALLOWED_IMAGE_TYPES : new Set([...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES]);
-      if (file.type && !acceptedTypes.has(file.type)) {
+      const acceptsVideo = accept.includes("video/");
+      const acceptedTypes = acceptsVideo ? new Set([...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES]) : ALLOWED_IMAGE_TYPES;
+      const ext = file.name.split(".").pop()?.toLowerCase() || "file";
+      const contentType = file.type || EXTENSION_TYPES[ext];
+
+      if (contentType && !acceptedTypes.has(contentType)) {
         setError(uploadErrorMessage("mime type not allowed"));
         return;
       }
 
-      const ext = file.name.split(".").pop() || "file";
       const baseName = file.name.replace(new RegExp(`\\.${ext}$`, "i"), "");
       const safeName = sanitizeName(baseName) || "media";
       const path = `admin/${Date.now()}-${createId()}-${safeName}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from(MEDIA_BUCKET)
-        .upload(path, file, { cacheControl: "31536000", upsert: false, contentType: file.type || undefined });
+        .upload(path, file, { cacheControl: "31536000", upsert: false, contentType });
 
       if (uploadError) {
         setError(uploadErrorMessage(uploadError.message));
