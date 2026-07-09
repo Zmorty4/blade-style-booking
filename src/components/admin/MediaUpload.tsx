@@ -76,9 +76,10 @@ export const MediaUpload = memo(function MediaUpload({
       const acceptsVideo = accept.includes("video/");
       const acceptedTypes = acceptsVideo ? new Set([...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES]) : ALLOWED_IMAGE_TYPES;
       const ext = file.name.split(".").pop()?.toLowerCase() || "file";
-      const contentType = file.type || EXTENSION_TYPES[ext];
+      const detectedType = EXTENSION_TYPES[ext] || file.type;
+      const contentType = detectedType || "application/octet-stream";
 
-      if (contentType && !acceptedTypes.has(contentType)) {
+      if (detectedType && !acceptedTypes.has(detectedType)) {
         setError(uploadErrorMessage("mime type not allowed"));
         return;
       }
