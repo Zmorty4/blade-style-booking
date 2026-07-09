@@ -1,8 +1,18 @@
-import { memo, useState } from "react";
+import { memo, useRef, useState } from "react";
 import { Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const MEDIA_BUCKET = "media";
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+  "image/heic",
+  "image/heif",
+]);
+const ALLOWED_VIDEO_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime"]);
 
 function isVideoUrl(url: string) {
   return /\.(mp4|webm|mov)(\?|$)/i.test(url);
@@ -10,6 +20,23 @@ function isVideoUrl(url: string) {
 
 function sanitizeName(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function createId() {
+  return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function uploadErrorMessage(message: string) {
+  if (/mime|type|not allowed/i.test(message)) {
+    return "Этот формат фото не поддерживается. Попробуйте JPG, PNG, WEBP, HEIC/HEIF или AVIF.";
+  }
+  if (/row-level security|permission|unauthorized|jwt/i.test(message)) {
+    return "Нет доступа к загрузке. Выйдите из админки и войдите снова.";
+  }
+  if (/size|too large/i.test(message)) {
+    return "Файл слишком большой. Загрузите фото меньше 50 MB.";
+  }
+  return message || "Не удалось загрузить файл";
 }
 
 export const MediaUpload = memo(function MediaUpload({
@@ -25,30 +52,42 @@ export const MediaUpload = memo(function MediaUpload({
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function upload(file: File | null) {
     if (!file) return;
     setUploading(true);
     setError("");
 
-    const ext = file.name.split(".").pop() || "file";
-    const baseName = file.name.replace(new RegExp(`\\.${ext}$`, "i"), "");
-    const safeName = sanitizeName(baseName) || "media";
-    const path = `admin/${Date.now()}-${crypto.randomUUID()}-${safeName}.${ext}`;
+    try {
+      const acceptedTypes = accept.startsWith("image/") ? ALLOWED_IMAGE_TYPES : new Set([...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES]);
+      if (file.type && !acceptedTypes.has(file.type)) {
+        setError(uploadErrorMessage("mime type not allowed"));
+        return;
+      }
 
-    const { error: uploadError } = await supabase.storage
-      .from(MEDIA_BUCKET)
-      .upload(path, file, { cacheControl: "31536000", upsert: false });
+      const ext = file.name.split(".").pop() || "file";
+      const baseName = file.name.replace(new RegExp(`\\.${ext}$`, "i"), "");
+      const safeName = sanitizeName(baseName) || "media";
+      const path = `admin/${Date.now()}-${createId()}-${safeName}.${ext}`;
 
-    if (uploadError) {
-      setError(uploadError.message || "Не удалось загрузить файл");
+      const { error: uploadError } = await supabase.storage
+        .from(MEDIA_BUCKET)
+        .upload(path, file, { cacheControl: "31536000", upsert: false, contentType: file.type || undefined });
+
+      if (uploadError) {
+        setError(uploadErrorMessage(uploadError.message));
+        return;
+      }
+
+      const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path);
+      onChange(data.publicUrl);
+    } catch (err) {
+      setError(uploadErrorMessage(err instanceof Error ? err.message : ""));
+    } finally {
       setUploading(false);
-      return;
+      if (inputRef.current) inputRef.current.value = "";
     }
-
-    const { data } = supabase.storage.from(MEDIA_BUCKET).getPublicUrl(path);
-    onChange(data.publicUrl);
-    setUploading(false);
   }
 
   return (
@@ -56,6 +95,7 @@ export const MediaUpload = memo(function MediaUpload({
       <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">{label}</div>
       <label className="group flex min-h-32 cursor-pointer flex-col items-center justify-center border border-dashed border-[#171411]/18 bg-white/45 p-4 text-center transition-colors hover:border-[#171411] hover:bg-white/70">
         <input
+          ref={inputRef}
           type="file"
           accept={accept}
           className="sr-only"
