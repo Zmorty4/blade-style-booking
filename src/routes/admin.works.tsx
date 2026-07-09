@@ -1,15 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MediaUpload, isVideoMedia } from "@/components/admin/MediaUpload";
-import { Input, Modal } from "./admin.services";
 
 export const Route = createFileRoute("/admin/works")({
   component: WorksAdmin,
 });
 
 type Work = {
-  id: string;
+  id?: string;
   title: string;
   description: string | null;
   image_url: string | null;
@@ -17,17 +16,40 @@ type Work = {
   sort_order: number;
 };
 
-const EMPTY: Partial<Work> = { title: "Фото", description: "", image_url: "", is_active: true, sort_order: 0 };
+const MIN_SLOTS = 3;
 const db = supabase as any;
+
+function emptySlot(sortOrder: number): Work {
+  return {
+    title: "Фото",
+    description: null,
+    image_url: null,
+    is_active: false,
+    sort_order: sortOrder,
+  };
+}
 
 function WorksAdmin() {
   const [items, setItems] = useState<Work[]>([]);
-  const [editing, setEditing] = useState<Partial<Work> | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [pageError, setPageError] = useState("");
+
+  const slots = useMemo(() => {
+    const sorted = [...items].sort((a, b) => Number(a.sort_order) - Number(b.sort_order));
+    const result = [...sorted];
+    for (let index = result.length; index < MIN_SLOTS; index += 1) {
+      result.push(emptySlot(index + 1));
+    }
+    return result;
+  }, [items]);
 
   async function load() {
-    const { data } = await db.from("portfolio_items").select("*").order("sort_order");
+    const { data, error } = await db.from("portfolio_items").select("*").order("sort_order").order("created_at");
+    if (error) {
+      setPageError(error.message || "Не удалось загрузить работы");
+      return;
+    }
+    setPageError("");
     setItems((data || []) as Work[]);
   }
 
@@ -40,72 +62,51 @@ function WorksAdmin() {
   }, []);
 
   function nextSortOrder() {
-    return items.reduce((max, item) => Math.max(max, Number(item.sort_order) || 0), 0) + 1;
+    return slots.reduce((max, item) => Math.max(max, Number(item.sort_order) || 0), 0) + 1;
   }
 
-  async function updateImageUrl(url: string) {
-    const editingId = editing?.id;
-    setEditing((current) => current ? { ...current, image_url: url } : current);
-    setError("");
-
-    if (!editingId) return;
-
-    setSaving(true);
-    const { error: updateError } = await db
-      .from("portfolio_items")
-      .update({ image_url: url || null })
-      .eq("id", editingId)
-      .select("id")
-      .maybeSingle();
-    setSaving(false);
-
-    if (updateError) {
-      setError(updateError.message || "Не удалось заменить фото");
-      return;
-    }
-
-    await load();
-  }
-
-  async function save() {
-    if (!editing?.image_url) {
-      setError("Сначала загрузите фото");
-      return;
-    }
-    setSaving(true);
-    setError("");
+  async function saveSlot(slot: Work, changes: Partial<Work>) {
+    const tempKey = slot.id || `slot-${slot.sort_order}`;
+    setSavingId(tempKey);
+    setPageError("");
 
     const payload = {
-      title: editing.title?.trim() || "Фото",
+      title: changes.title ?? slot.title ?? "Фото",
       description: null,
-      image_url: editing.image_url || null,
-      is_active: editing.is_active ?? true,
-      sort_order: Number(editing.sort_order) || 0,
+      image_url: changes.image_url ?? slot.image_url ?? null,
+      is_active: changes.is_active ?? Boolean(changes.image_url ?? slot.image_url),
+      sort_order: Number(changes.sort_order ?? slot.sort_order) || nextSortOrder(),
     };
 
-    const result = editing.id
-      ? await db.from("portfolio_items").update(payload).eq("id", editing.id).select("id").maybeSingle()
-      : await db.from("portfolio_items").insert(payload).select("id").maybeSingle();
+    const result = slot.id
+      ? await db.from("portfolio_items").update(payload).eq("id", slot.id).select("*").maybeSingle()
+      : await db.from("portfolio_items").insert(payload).select("*").maybeSingle();
 
-    setSaving(false);
+    setSavingId(null);
+
     if (result.error) {
-      setError(result.error.message || "Не удалось сохранить фото");
+      setPageError(result.error.message || "Не удалось сохранить фото");
       return;
     }
 
     await load();
-    setEditing(null);
   }
 
-  async function del(id: string) {
-    if (!confirm("Удалить работу?")) return;
-    await db.from("portfolio_items").delete().eq("id", id);
-    load();
+  async function addSlot() {
+    await saveSlot(emptySlot(nextSortOrder()), { is_active: false });
   }
 
-  async function toggle(item: Work) {
-    await db.from("portfolio_items").update({ is_active: !item.is_active }).eq("id", item.id);
-    load();
+  async function deleteSlot(slot: Work) {
+    if (!slot.id) return;
+    if (!confirm("Удалить фото из портфолио?")) return;
+    setSavingId(slot.id);
+    const { error } = await db.from("portfolio_items").delete().eq("id", slot.id);
+    setSavingId(null);
+    if (error) {
+      setPageError(error.message || "Не удалось удалить фото");
+      return;
+    }
+    await load();
   }
 
   return (
@@ -115,47 +116,79 @@ function WorksAdmin() {
           <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Наши работы</div>
           <h1 className="mt-2 text-4xl font-extrabold tracking-[-0.035em]">Портфолио</h1>
         </div>
-        <button onClick={() => { setError(""); setEditing({ ...EMPTY, sort_order: nextSortOrder() }); }} className="rounded-full bg-[#171411] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black">
+        <button
+          onClick={addSlot}
+          className="rounded-full bg-[#171411] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black"
+        >
           + Добавить фото
         </button>
       </div>
 
-      <div className="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((item) => (
-          <div key={item.id} className={`border bg-white/45 p-4 transition-all duration-500 hover:-translate-y-1 hover:border-[#171411]/35 ${item.is_active ? "border-[#171411]/12" : "border-[#171411]/10 opacity-50"}`}>
-            <button
-              type="button"
-              onClick={() => { setError(""); setEditing(item); }}
-              className="block aspect-[4/5] w-full overflow-hidden border border-[#171411]/10 bg-[#171411]/8 text-left"
-            >
-              {item.image_url ? (
-                isVideoMedia(item.image_url) ? <video src={item.image_url} className="h-full w-full object-cover object-center grayscale transition-transform duration-700 hover:scale-105" muted playsInline /> : <img src={item.image_url} alt="" className="h-full w-full object-cover object-center grayscale transition-transform duration-700 hover:scale-105" />
-              ) : <div className="flex h-full items-center justify-center text-sm text-[#171411]/45">Нет фото</div>}
-            </button>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <button onClick={() => { setError(""); setEditing(item); }} className="flex-1 border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">Редакт.</button>
-              <button onClick={() => toggle(item)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">{item.is_active ? "Скрыть" : "Вкл"}</button>
-              <button onClick={() => del(item.id)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-destructive hover:text-destructive">Удал.</button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {pageError && <div className="mt-6 border border-destructive/35 bg-destructive/10 p-4 text-sm font-semibold text-destructive">{pageError}</div>}
 
-      {editing && (
-        <Modal onClose={() => setEditing(null)}>
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">{editing.id ? "Редактирование" : "Новое фото"}</div>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.03em]">Фото</h2>
-          <div className="mt-6 space-y-5">
-            <MediaUpload label="Фото" value={editing.image_url || ""} onChange={updateImageUrl} accept="image/*" />
-            <Input label="Порядок" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />
-          </div>
-          {error && <div className="mt-4 text-sm font-semibold text-destructive">{error}</div>}
-          <div className="mt-8 flex justify-end gap-3">
-            <button onClick={() => setEditing(null)} className="px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411]/50 hover:text-[#171411]">Отмена</button>
-            <button onClick={save} disabled={saving} className="rounded-full bg-[#171411] px-6 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black disabled:opacity-50">{saving ? "Сохранение..." : "Сохранить"}</button>
-          </div>
-        </Modal>
-      )}
+      <div className="mt-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {slots.map((slot, index) => {
+          const slotKey = slot.id || `empty-${slot.sort_order}`;
+          const saving = savingId === slotKey;
+
+          return (
+            <div key={slotKey} className={`border bg-white/45 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 ${slot.is_active ? "border-[#171411]/12" : "border-[#171411]/10 opacity-80"}`}>
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#171411]/45">Фото {index + 1}</div>
+                  <div className="mt-1 text-sm font-semibold text-[#171411]/55">{slot.image_url ? "Можно заменить" : "Загрузите фото"}</div>
+                </div>
+                {saving && <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#171411]/45">Сохранение...</span>}
+              </div>
+
+              <MediaUpload
+                label=""
+                value={slot.image_url || ""}
+                onChange={(url) => saveSlot(slot, { image_url: url, is_active: Boolean(url) })}
+                accept="image/*"
+              />
+
+              <div className="mt-5 flex items-end gap-3">
+                <label className="min-w-0 flex-1">
+                  <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#171411]/45">Порядок</div>
+                  <input
+                    type="number"
+                    value={slot.sort_order}
+                    onChange={(event) => saveSlot(slot, { sort_order: Number(event.target.value) })}
+                    className="w-full border border-[#171411]/15 bg-white/55 px-3 py-2 outline-none focus:border-[#171411]"
+                  />
+                </label>
+                {slot.id && (
+                  <button
+                    onClick={() => saveSlot(slot, { is_active: !slot.is_active })}
+                    className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]"
+                  >
+                    {slot.is_active ? "Скрыть" : "Вкл"}
+                  </button>
+                )}
+                {slot.id && (
+                  <button
+                    onClick={() => deleteSlot(slot)}
+                    className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-destructive hover:text-destructive"
+                  >
+                    Удал.
+                  </button>
+                )}
+              </div>
+
+              {slot.image_url && (
+                <div className="mt-4 aspect-[4/5] overflow-hidden border border-[#171411]/10 bg-[#171411]/8">
+                  {isVideoMedia(slot.image_url) ? (
+                    <video src={slot.image_url} className="h-full w-full object-cover object-center grayscale" muted playsInline />
+                  ) : (
+                    <img src={slot.image_url} alt="" className="h-full w-full object-cover object-center grayscale" />
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

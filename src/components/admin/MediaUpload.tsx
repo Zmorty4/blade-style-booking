@@ -109,7 +109,7 @@ export const MediaUpload = memo(function MediaUpload({
 
   return (
     <div>
-      <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">{label}</div>
+      {label && <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-[#171411]/45">{label}</div>}
       <label className="group flex min-h-32 cursor-pointer flex-col items-center justify-center border border-dashed border-[#171411]/18 bg-white/45 p-4 text-center transition-colors hover:border-[#171411] hover:bg-white/70">
         <input
           ref={inputRef}
