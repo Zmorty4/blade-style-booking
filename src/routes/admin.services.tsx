@@ -14,6 +14,7 @@ type S = {
 };
 
 const EMPTY: Partial<S> = { name: "", description: "", price: 2000, duration: 45, image_url: "", is_active: true, sort_order: 0 };
+const PORTFOLIO_PREFIX = "[portfolio-work]";
 
 function ServicesAdmin() {
   const [items, setItems] = useState<S[]>([]);
@@ -21,7 +22,7 @@ function ServicesAdmin() {
 
   async function load() {
     const { data } = await supabase.from("services").select("*").order("sort_order");
-    setItems((data || []) as S[]);
+    setItems(((data || []) as S[]).filter((item) => !item.name.startsWith(PORTFOLIO_PREFIX)));
   }
   useEffect(() => { load(); }, []);
 

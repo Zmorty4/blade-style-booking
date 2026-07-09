@@ -31,6 +31,7 @@ const DEFAULT_WORKS: Work[] = [
   { id: "demo-3", title: "Классика с текстурой", description: "Спокойная форма с живым верхом.", image_url: WORK_FALLBACKS[2] },
 ];
 const db = supabase as any;
+const PORTFOLIO_PREFIX = "[portfolio-work]";
 
 function isVideoMedia(url?: string | null) {
   return Boolean(url && /\.(mp4|webm|mov)(\?|$)/i.test(url));
@@ -65,9 +66,19 @@ function Landing() {
     void cleanupPastBookings();
 
     async function loadWorks() {
-      const { data } = await db.from("portfolio_items").select("id,title,description,image_url").eq("is_active", true).order("sort_order");
+      const { data } = await db
+        .from("services")
+        .select("id,name,description,image_url")
+        .like("name", `${PORTFOLIO_PREFIX}%`)
+        .not("image_url", "is", null)
+        .order("sort_order");
       if (!alive) return;
-      setWorks(data?.length ? data as Work[] : DEFAULT_WORKS);
+      setWorks(data?.length ? data.map((item: any, index: number) => ({
+        id: item.id,
+        title: `Фото ${index + 1}`,
+        description: item.description,
+        image_url: item.image_url,
+      })) as Work[] : DEFAULT_WORKS);
     }
 
     async function loadSettings() {
@@ -80,18 +91,23 @@ function Landing() {
       const [s, m, w, cfg] = await Promise.all([
         supabase.from("services").select("id,name,description,price,duration,image_url").eq("is_active", true).order("sort_order"),
         supabase.from("masters").select("id,name,speciality,experience,photo_url").eq("is_active", true),
-        db.from("portfolio_items").select("id,title,description,image_url").eq("is_active", true).order("sort_order"),
+        db.from("services").select("id,name,description,image_url").like("name", `${PORTFOLIO_PREFIX}%`).not("image_url", "is", null).order("sort_order"),
         supabase.from("shop_settings").select("*").limit(1).maybeSingle(),
       ]);
       if (!alive) return;
       if (s.data) setServices(s.data as Service[]);
       if (m.data) setMasters(m.data as Master[]);
-      setWorks(w.data?.length ? w.data as Work[] : DEFAULT_WORKS);
+      setWorks(w.data?.length ? w.data.map((item: any, index: number) => ({
+        id: item.id,
+        title: `Фото ${index + 1}`,
+        description: item.description,
+        image_url: item.image_url,
+      })) as Work[] : DEFAULT_WORKS);
       if (cfg.data) setSettings(cfg.data as Settings);
     })();
 
     const channel = supabase.channel("landing-live-data")
-      .on("postgres_changes", { event: "*", schema: "public", table: "portfolio_items" }, () => { void loadWorks(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "services" }, () => { void loadWorks(); })
       .on("postgres_changes", { event: "*", schema: "public", table: "shop_settings" }, () => { void loadSettings(); })
       .subscribe();
 

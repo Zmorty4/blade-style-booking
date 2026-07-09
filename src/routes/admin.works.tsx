@@ -7,30 +7,22 @@ export const Route = createFileRoute("/admin/works")({
   component: WorksAdmin,
 });
 
-type Work = {
+type PortfolioSlot = {
   id?: string;
-  title: string;
-  description: string | null;
   image_url: string | null;
-  is_active: boolean;
   sort_order: number;
 };
 
 const MIN_SLOTS = 3;
+const PORTFOLIO_PREFIX = "[portfolio-work]";
 const db = supabase as any;
 
-function emptySlot(sortOrder: number): Work {
-  return {
-    title: "Фото",
-    description: null,
-    image_url: null,
-    is_active: false,
-    sort_order: sortOrder,
-  };
+function emptySlot(sortOrder: number): PortfolioSlot {
+  return { image_url: null, sort_order: sortOrder };
 }
 
 function WorksAdmin() {
-  const [items, setItems] = useState<Work[]>([]);
+  const [items, setItems] = useState<PortfolioSlot[]>([]);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [pageError, setPageError] = useState("");
 
@@ -44,19 +36,29 @@ function WorksAdmin() {
   }, [items]);
 
   async function load() {
-    const { data, error } = await db.from("portfolio_items").select("*").order("sort_order").order("created_at");
+    const { data, error } = await db
+      .from("services")
+      .select("id,name,image_url,sort_order")
+      .like("name", `${PORTFOLIO_PREFIX}%`)
+      .order("sort_order");
+
     if (error) {
-      setPageError(error.message || "Не удалось загрузить работы");
+      setPageError(error.message || "Не удалось загрузить фото");
       return;
     }
+
     setPageError("");
-    setItems((data || []) as Work[]);
+    setItems((data || []).map((row: any) => ({
+      id: row.id,
+      image_url: row.image_url,
+      sort_order: Number(row.sort_order) || 0,
+    })));
   }
 
   useEffect(() => {
     load();
-    const channel = supabase.channel("admin-portfolio-items")
-      .on("postgres_changes", { event: "*", schema: "public", table: "portfolio_items" }, () => { void load(); })
+    const channel = supabase.channel("admin-portfolio-service-slots")
+      .on("postgres_changes", { event: "*", schema: "public", table: "services" }, () => { void load(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
@@ -65,22 +67,25 @@ function WorksAdmin() {
     return slots.reduce((max, item) => Math.max(max, Number(item.sort_order) || 0), 0) + 1;
   }
 
-  async function saveSlot(slot: Work, changes: Partial<Work>) {
+  async function saveSlot(slot: PortfolioSlot, changes: Partial<PortfolioSlot>) {
     const tempKey = slot.id || `slot-${slot.sort_order}`;
     setSavingId(tempKey);
     setPageError("");
 
+    const sortOrder = Number(changes.sort_order ?? slot.sort_order) || nextSortOrder();
     const payload = {
-      title: changes.title ?? slot.title ?? "Фото",
+      name: `${PORTFOLIO_PREFIX} ${sortOrder}`,
       description: null,
+      price: 0,
+      duration: 0,
       image_url: changes.image_url ?? slot.image_url ?? null,
-      is_active: changes.is_active ?? Boolean(changes.image_url ?? slot.image_url),
-      sort_order: Number(changes.sort_order ?? slot.sort_order) || nextSortOrder(),
+      is_active: false,
+      sort_order: sortOrder,
     };
 
     const result = slot.id
-      ? await db.from("portfolio_items").update(payload).eq("id", slot.id).select("*").maybeSingle()
-      : await db.from("portfolio_items").insert(payload).select("*").maybeSingle();
+      ? await db.from("services").update(payload).eq("id", slot.id).select("id").maybeSingle()
+      : await db.from("services").insert(payload).select("id").maybeSingle();
 
     setSavingId(null);
 
@@ -93,14 +98,14 @@ function WorksAdmin() {
   }
 
   async function addSlot() {
-    await saveSlot(emptySlot(nextSortOrder()), { is_active: false });
+    await saveSlot(emptySlot(nextSortOrder()), {});
   }
 
-  async function deleteSlot(slot: Work) {
+  async function deleteSlot(slot: PortfolioSlot) {
     if (!slot.id) return;
     if (!confirm("Удалить фото из портфолио?")) return;
     setSavingId(slot.id);
-    const { error } = await db.from("portfolio_items").delete().eq("id", slot.id);
+    const { error } = await db.from("services").delete().eq("id", slot.id);
     setSavingId(null);
     if (error) {
       setPageError(error.message || "Не удалось удалить фото");
@@ -132,7 +137,7 @@ function WorksAdmin() {
           const saving = savingId === slotKey;
 
           return (
-            <div key={slotKey} className={`border bg-white/45 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 ${slot.is_active ? "border-[#171411]/12" : "border-[#171411]/10 opacity-80"}`}>
+            <div key={slotKey} className="border border-[#171411]/12 bg-white/45 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#171411]/45">Фото {index + 1}</div>
@@ -144,7 +149,7 @@ function WorksAdmin() {
               <MediaUpload
                 label=""
                 value={slot.image_url || ""}
-                onChange={(url) => saveSlot(slot, { image_url: url, is_active: Boolean(url) })}
+                onChange={(url) => saveSlot(slot, { image_url: url })}
                 accept="image/*"
               />
 
@@ -158,14 +163,6 @@ function WorksAdmin() {
                     className="w-full border border-[#171411]/15 bg-white/55 px-3 py-2 outline-none focus:border-[#171411]"
                   />
                 </label>
-                {slot.id && (
-                  <button
-                    onClick={() => saveSlot(slot, { is_active: !slot.is_active })}
-                    className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]"
-                  >
-                    {slot.is_active ? "Скрыть" : "Вкл"}
-                  </button>
-                )}
                 {slot.id && (
                   <button
                     onClick={() => deleteSlot(slot)}
