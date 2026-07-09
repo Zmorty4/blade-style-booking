@@ -34,7 +34,7 @@ function WorksAdmin() {
     for (let index = result.length; index < MIN_SLOTS; index += 1) {
       result.push(emptySlot(index + 1));
     }
-    return result.slice(0, MIN_SLOTS);
+    return result;
   }, [items]);
 
   async function load() {

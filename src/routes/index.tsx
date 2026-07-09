@@ -35,15 +35,21 @@ const PORTFOLIO_PREFIX = "[portfolio-work]";
 
 function toPortfolioWorks(rows?: Array<{ id: string; description: string | null; image_url: string | null; sort_order?: number | null }> | null): Work[] {
   const result = DEFAULT_WORKS.map((work) => ({ ...work }));
-  (rows || []).forEach((item, index) => {
+  const sortedRows = [...(rows || [])].sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+  sortedRows.forEach((item, index) => {
     if (!item.image_url) return;
-    const position = Math.max(0, Math.min(2, Number(item.sort_order || index + 1) - 1));
-    result[position] = {
+    const position = Math.max(0, Number(item.sort_order || index + 1) - 1);
+    const work = {
       id: item.id,
       title: `Фото ${position + 1}`,
       description: item.description,
       image_url: item.image_url,
     };
+    if (position < result.length) {
+      result[position] = work;
+    } else {
+      result.push(work);
+    }
   });
   return result;
 }
@@ -154,7 +160,7 @@ function Landing() {
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-end">
           <div className="animate-hero-rise">
             <div className="inline-flex rounded-full border border-[#171411]/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#171411]/65">
-              Premium barbershop
+              Барбершоп премиум-класса
             </div>
             <h1 className="mt-7 max-w-4xl font-sans text-[44px] font-extrabold leading-[0.98] tracking-[-0.035em] text-[#171411] sm:text-[58px] lg:text-[78px]">
               Острые линии, чистый фейд и стиль без суеты.
@@ -185,18 +191,18 @@ function Landing() {
               <MediaFrame src={heroMedia} fallback={HERO_FALLBACK} alt="BLADE & STYLE" className="h-full w-full object-cover grayscale motion-safe:animate-ken-burns" />
             </div>
             <Link to="/booking" className="absolute -bottom-5 left-5 rounded-full bg-white px-6 py-4 text-sm font-extrabold text-[#171411] shadow-2xl hover:bg-[#171411] hover:text-white">
-              Book now →
+              Записаться →
             </Link>
             <div className="absolute -right-3 top-8 hidden max-w-[180px] border border-white/45 bg-[#171411] p-4 text-sm font-semibold leading-6 text-[#f3eee5] shadow-xl sm:block">
-              Clean cuts. Calm space. Sharp result.
+              Чистая работа. Спокойная атмосфера. Точный результат.
             </div>
           </div>
         </div>
       </section>
 
-      <Marquee words={["Confidence", "Precision", "Comfort", "Experience", "Clean fades", "Good vibes"]} />
+      <Marquee words={["Уверенность", "Точность", "Комфорт", "Опыт", "Чистый фейд", "Хорошее настроение"]} />
 
-      <Section id="services" label="Client favorites" title="Услуги и цены" subtitle="Без лишних фото: только понятный выбор, длительность и цена.">
+      <Section id="services" label="Любимые услуги" title="Услуги и цены" subtitle="Понятный выбор, длительность и цена перед записью.">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {services.map((s, i) => <ServiceCard key={s.id} s={s} index={i} />)}
           {services.length === 0 && Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-44 animate-pulse bg-[#171411]/5" />)}
@@ -205,7 +211,7 @@ function Landing() {
 
       <PhotoSection
         id="masters"
-        label="Our team"
+        label="Наша команда"
         title="Мастера, которым доверяют форму."
         subtitle="Листай фото стрелками влево и вправо."
         railRef={mastersRef}
@@ -215,7 +221,7 @@ function Landing() {
 
       <PhotoSection
         id="works"
-        label="Our works"
+        label="Наши работы"
         title="Работы крупным планом."
         subtitle="Фотографии берутся из админки и двигаются стрелками как портфолио."
         railRef={worksRef}
@@ -223,7 +229,7 @@ function Landing() {
         {works.map((work, i) => <WorkCard key={work.id} work={work} index={i} />)}
       </PhotoSection>
 
-      <Section id="how" label="Process" title="Как проходит запись" subtitle="Простой путь от выбора услуги до кресла мастера.">
+      <Section id="how" label="Процесс" title="Как проходит запись" subtitle="Простой путь от выбора услуги до кресла мастера.">
         <div className="grid gap-4 md:grid-cols-4">
           {[["01", "Выбери услугу"], ["02", "Выбери мастера"], ["03", "Выбери время"], ["04", "Приходи"]].map(([n, t], i) => (
             <div key={n} className="group relative border border-[#171411]/12 bg-white/35 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 hover:bg-white/70">
@@ -238,18 +244,18 @@ function Landing() {
       <section className="bg-[#171411] px-5 py-20 text-[#f3eee5] md:py-28">
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-end">
           <div>
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#f3eee5]/50">About</div>
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#f3eee5]/50">О нас</div>
             <h2 className="mt-5 max-w-2xl text-4xl font-extrabold leading-[1.02] tracking-[-0.035em] md:text-6xl">
               Не просто стрижка, а спокойная точная работа.
             </h2>
           </div>
           <p className="max-w-xl text-base leading-8 text-[#f3eee5]/68">
-            Мы оставили быстрые онлайн-заявки, админку и управление фото, но сделали подачу легче: больше воздуха, мягче типографика, понятнее блоки и меньше визуального шума.
+            Здесь ценят аккуратность, спокойную атмосферу и результат, который держит форму после выхода из кресла. Мастера внимательно слушают пожелания, подбирают стрижку под стиль клиента и доводят детали до чистого, уверенного вида.
           </p>
         </div>
       </section>
 
-      <Section label="Reviews" title="Клиенты возвращаются" subtitle="Коротко о том, почему выбирают BLADE & STYLE.">
+      <Section label="Отзывы" title="Клиенты возвращаются" subtitle="Коротко о том, почему выбирают BLADE & STYLE.">
         <div className="grid gap-4 md:grid-cols-3">
           {[
             { name: "Артём", text: "Хожу второй год. Атмосфера спокойная, мастер слышит задачу, фейд всегда чистый." },
@@ -269,7 +275,7 @@ function Landing() {
         <div className="mx-auto max-w-7xl border border-[#171411]/14 bg-white/35 p-7 md:p-12">
           <div className="grid gap-10 md:grid-cols-2 md:items-end">
             <div>
-              <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Contacts</div>
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Контакты</div>
               <h2 className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.02] tracking-[-0.035em] text-[#171411] md:text-6xl">Приходите за свежей формой.</h2>
               <div className="mt-8 grid gap-4 text-sm sm:grid-cols-2">
                 <Info label="АДРЕС" value={settings?.address} />
