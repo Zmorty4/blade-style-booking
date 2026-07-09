@@ -33,6 +33,21 @@ const DEFAULT_WORKS: Work[] = [
 const db = supabase as any;
 const PORTFOLIO_PREFIX = "[portfolio-work]";
 
+function toPortfolioWorks(rows?: Array<{ id: string; description: string | null; image_url: string | null; sort_order?: number | null }> | null): Work[] {
+  const result = DEFAULT_WORKS.map((work) => ({ ...work }));
+  (rows || []).forEach((item, index) => {
+    if (!item.image_url) return;
+    const position = Math.max(0, Math.min(2, Number(item.sort_order || index + 1) - 1));
+    result[position] = {
+      id: item.id,
+      title: `Фото ${position + 1}`,
+      description: item.description,
+      image_url: item.image_url,
+    };
+  });
+  return result;
+}
+
 function isVideoMedia(url?: string | null) {
   return Boolean(url && /\.(mp4|webm|mov)(\?|$)/i.test(url));
 }
@@ -68,7 +83,7 @@ function Landing() {
     async function loadWorks() {
       const { data } = await db
         .from("services")
-        .select("id,name,description,image_url")
+        .select("id,name,description,image_url,sort_order")
         .like("name", `${PORTFOLIO_PREFIX}%`)
         .not("image_url", "is", null)
         .order("sort_order");
@@ -79,6 +94,7 @@ function Landing() {
         description: item.description,
         image_url: item.image_url,
       })) as Work[] : DEFAULT_WORKS);
+      setWorks(toPortfolioWorks(data as any));
     }
 
     async function loadSettings() {
@@ -91,7 +107,7 @@ function Landing() {
       const [s, m, w, cfg] = await Promise.all([
         supabase.from("services").select("id,name,description,price,duration,image_url").eq("is_active", true).order("sort_order"),
         supabase.from("masters").select("id,name,speciality,experience,photo_url").eq("is_active", true),
-        db.from("services").select("id,name,description,image_url").like("name", `${PORTFOLIO_PREFIX}%`).not("image_url", "is", null).order("sort_order"),
+        db.from("services").select("id,name,description,image_url,sort_order").like("name", `${PORTFOLIO_PREFIX}%`).not("image_url", "is", null).order("sort_order"),
         supabase.from("shop_settings").select("*").limit(1).maybeSingle(),
       ]);
       if (!alive) return;
@@ -103,6 +119,7 @@ function Landing() {
         description: item.description,
         image_url: item.image_url,
       })) as Work[] : DEFAULT_WORKS);
+      setWorks(toPortfolioWorks(w.data as any));
       if (cfg.data) setSettings(cfg.data as Settings);
     })();
 
