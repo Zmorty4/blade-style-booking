@@ -123,11 +123,15 @@ function WorksAdmin() {
       <div className="mt-9 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((item) => (
           <div key={item.id} className={`border bg-white/45 p-4 transition-all duration-500 hover:-translate-y-1 hover:border-[#171411]/35 ${item.is_active ? "border-[#171411]/12" : "border-[#171411]/10 opacity-50"}`}>
-            <div className="aspect-[4/5] overflow-hidden border border-[#171411]/10 bg-[#171411]/8">
+            <button
+              type="button"
+              onClick={() => { setError(""); setEditing(item); }}
+              className="block aspect-[4/5] w-full overflow-hidden border border-[#171411]/10 bg-[#171411]/8 text-left"
+            >
               {item.image_url ? (
                 isVideoMedia(item.image_url) ? <video src={item.image_url} className="h-full w-full object-cover object-center grayscale transition-transform duration-700 hover:scale-105" muted playsInline /> : <img src={item.image_url} alt="" className="h-full w-full object-cover object-center grayscale transition-transform duration-700 hover:scale-105" />
               ) : <div className="flex h-full items-center justify-center text-sm text-[#171411]/45">Нет фото</div>}
-            </div>
+            </button>
             <div className="mt-5 flex flex-wrap gap-2">
               <button onClick={() => { setError(""); setEditing(item); }} className="flex-1 border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">Редакт.</button>
               <button onClick={() => toggle(item)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">{item.is_active ? "Скрыть" : "Вкл"}</button>
