@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,7 +12,7 @@ function sanitizeName(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
-export function MediaUpload({
+export const MediaUpload = memo(function MediaUpload({
   label,
   value,
   onChange,
@@ -97,7 +97,7 @@ export function MediaUpload({
       {error && <div className="mt-2 text-sm text-destructive">{error}</div>}
     </div>
   );
-}
+});
 
 export function isVideoMedia(url?: string | null) {
   return Boolean(url && isVideoUrl(url));

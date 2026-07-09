@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MediaUpload } from "@/components/admin/MediaUpload";
 import { Input } from "./admin.services";
@@ -18,6 +18,7 @@ function SettingsAdmin() {
   const [form, setForm] = useState<S>(EMPTY);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     supabase.from("shop_settings").select("*").limit(1).maybeSingle().then(({ data }) => {
@@ -26,19 +27,35 @@ function SettingsAdmin() {
   }, []);
 
   async function save() {
-    setLoading(true); setSaved(false);
+    setLoading(true); setSaved(false); setError("");
     const payload: any = { ...form };
     delete payload.id;
-    if (form.id) await supabase.from("shop_settings").update(payload).eq("id", form.id);
-    else {
-      const { data } = await supabase.from("shop_settings").insert(payload).select().single();
-      if (data) setForm({ ...form, id: (data as any).id });
+    const result = form.id
+      ? await supabase.from("shop_settings").update(payload).eq("id", form.id).select().single()
+      : await supabase.from("shop_settings").insert(payload).select().single();
+
+    if (result.error) {
+      setError(result.error.message || "Не удалось сохранить настройки");
+      setLoading(false);
+      return;
     }
+
+    const next = { ...EMPTY, ...(result.data as any) };
+    setForm(next);
+    window.dispatchEvent(new CustomEvent("shop-settings-updated", {
+      detail: { shop_name: next.shop_name, logo_url: next.logo_url },
+    }));
     setLoading(false); setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
 
-  const upd = (k: keyof S) => (v: string) => setForm({ ...form, [k]: v });
+  const upd = (k: keyof S) => (v: string) => setForm(current => ({ ...current, [k]: v }));
+  const updateHeroMedia = useCallback((value: string) => {
+    setForm(current => ({ ...current, hero_image_url: value }));
+  }, []);
+  const updateLogo = useCallback((value: string) => {
+    setForm(current => ({ ...current, logo_url: value }));
+  }, []);
 
   return (
     <div>
@@ -55,8 +72,8 @@ function SettingsAdmin() {
           </div>
           <Input label="Адрес" value={form.address} onChange={upd("address")} />
           <Input label="Часы работы" value={form.working_hours} onChange={upd("working_hours")} />
-          <MediaUpload label="Hero-фото или видео" value={form.hero_image_url} onChange={upd("hero_image_url")} />
-          <MediaUpload label="Логотип" value={form.logo_url} onChange={upd("logo_url")} accept="image/*" />
+          <MediaUpload label="Hero-фото или видео" value={form.hero_image_url} onChange={updateHeroMedia} />
+          <MediaUpload label="Логотип" value={form.logo_url} onChange={updateLogo} accept="image/*" />
           <div className="flex items-center gap-4 pt-2">
             <button onClick={save} disabled={loading} className="flex items-center gap-3 rounded-full bg-[#171411] px-8 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black disabled:opacity-50">
               {loading && <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[#f3eee5] border-t-transparent" />}
@@ -64,6 +81,7 @@ function SettingsAdmin() {
             </button>
             {saved && <span className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411]/62">✓ Сохранено</span>}
           </div>
+          {error && <div className="text-sm font-semibold text-destructive">{error}</div>}
         </div>
       </div>
     </div>

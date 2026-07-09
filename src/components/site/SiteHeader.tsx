@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-export function SiteHeader({ shopName = "BLADE & STYLE" }: { shopName?: string }) {
+export function SiteHeader({ shopName = "BLADE & STYLE", logoUrl = "" }: { shopName?: string; logoUrl?: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -22,9 +22,18 @@ export function SiteHeader({ shopName = "BLADE & STYLE" }: { shopName?: string }
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? "border-b border-[#171411]/10 bg-[#f3eee5]/90 backdrop-blur-xl" : "bg-transparent"}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
-        <Link to="/" className="leading-none text-[#171411] transition-opacity hover:opacity-70" onClick={() => setOpen(false)}>
-          <span className="block text-xl font-extrabold uppercase tracking-[-0.04em] sm:text-2xl">{shopName}</span>
-          <span className="mt-0.5 block text-xs font-semibold text-[#171411]/58 sm:text-sm">Hair Studio</span>
+        <Link to="/" className="flex items-center gap-3 leading-none text-[#171411] transition-opacity hover:opacity-70" onClick={() => setOpen(false)}>
+          {logoUrl && (
+            <img
+              src={logoUrl}
+              alt={`${shopName} logo`}
+              className="h-11 w-11 shrink-0 rounded-full border border-[#171411]/12 object-cover"
+            />
+          )}
+          <span>
+            <span className="block text-xl font-extrabold uppercase tracking-[-0.04em] sm:text-2xl">{shopName}</span>
+            <span className="mt-0.5 block text-xs font-semibold text-[#171411]/58 sm:text-sm">Hair Studio</span>
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

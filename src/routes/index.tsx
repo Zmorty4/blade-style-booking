@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
 type Service = { id: string; name: string; description: string | null; price: number; duration: number; image_url: string | null };
 type Master = { id: string; name: string; speciality: string | null; experience: string | null; photo_url: string | null };
 type Work = { id: string; title: string; description: string | null; image_url: string | null };
-type Settings = { shop_name: string | null; tagline: string | null; phone: string | null; address: string | null; working_hours: string | null; instagram: string | null; hero_image_url: string | null };
+type Settings = { shop_name: string | null; tagline: string | null; phone: string | null; address: string | null; working_hours: string | null; instagram: string | null; hero_image_url: string | null; logo_url: string | null };
 
 type RailRef = RefObject<HTMLDivElement | null>;
 
@@ -61,7 +61,21 @@ function Landing() {
   const worksRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    let alive = true;
     void cleanupPastBookings();
+
+    async function loadWorks() {
+      const { data } = await db.from("portfolio_items").select("id,title,description,image_url").eq("is_active", true).order("sort_order");
+      if (!alive) return;
+      setWorks(data?.length ? data as Work[] : DEFAULT_WORKS);
+    }
+
+    async function loadSettings() {
+      const { data } = await supabase.from("shop_settings").select("*").limit(1).maybeSingle();
+      if (!alive || !data) return;
+      setSettings(data as Settings);
+    }
+
     (async () => {
       const [s, m, w, cfg] = await Promise.all([
         supabase.from("services").select("id,name,description,price,duration,image_url").eq("is_active", true).order("sort_order"),
@@ -69,20 +83,39 @@ function Landing() {
         db.from("portfolio_items").select("id,title,description,image_url").eq("is_active", true).order("sort_order"),
         supabase.from("shop_settings").select("*").limit(1).maybeSingle(),
       ]);
+      if (!alive) return;
       if (s.data) setServices(s.data as Service[]);
       if (m.data) setMasters(m.data as Master[]);
-      if (w.data?.length) setWorks(w.data as Work[]);
+      setWorks(w.data?.length ? w.data as Work[] : DEFAULT_WORKS);
       if (cfg.data) setSettings(cfg.data as Settings);
     })();
+
+    const channel = supabase.channel("landing-live-data")
+      .on("postgres_changes", { event: "*", schema: "public", table: "portfolio_items" }, () => { void loadWorks(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "shop_settings" }, () => { void loadSettings(); })
+      .subscribe();
+
+    const onFocus = () => {
+      void loadWorks();
+      void loadSettings();
+    };
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      alive = false;
+      window.removeEventListener("focus", onFocus);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const shopName = settings?.shop_name || "BLADE & STYLE";
   const tagline = settings?.tagline || "Твой стиль — наше мастерство";
   const heroMedia = settings?.hero_image_url || HERO_FALLBACK;
+  const logoUrl = settings?.logo_url || "";
 
   return (
     <div className="min-h-screen bg-[#f3eee5] text-[#171411]">
-      <SiteHeader shopName={shopName} />
+      <SiteHeader shopName={shopName} logoUrl={logoUrl} />
 
       <section className="relative overflow-hidden px-5 pb-16 pt-32 md:pb-24 md:pt-36">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:items-end">
@@ -293,7 +326,7 @@ function PhotoSection({ id, label, title, subtitle, railRef, children }: { id: s
           </div>
           <CarouselControls onPrev={() => scrollRail(railRef, -1)} onNext={() => scrollRail(railRef, 1)} />
         </div>
-        <div ref={railRef} className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-3 scroll-smooth">
+        <div ref={railRef} className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-[11vw] pb-3 scroll-smooth sm:px-5">
           {children}
         </div>
       </div>
@@ -334,9 +367,9 @@ function ServiceCard({ s, index }: { s: Service; index: number }) {
 
 function MasterCard({ m, index }: { m: Master; index: number }) {
   return (
-    <div className="group min-w-[78vw] snap-start sm:min-w-[390px] lg:min-w-[440px]" style={{ transitionDelay: `${Math.min(index * 45, 180)}ms` }}>
+    <div className="group min-w-[78vw] snap-center sm:min-w-[390px] lg:min-w-[440px]" style={{ transitionDelay: `${Math.min(index * 45, 180)}ms` }}>
       <div className="aspect-[4/5] overflow-hidden bg-[#f3eee5]/8">
-        <MediaFrame src={m.photo_url} fallback={MASTER_FALLBACK} alt={m.name} className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0" />
+        <MediaFrame src={m.photo_url} fallback={MASTER_FALLBACK} alt={m.name} className="h-full w-full object-cover object-center grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0" />
       </div>
       <div className="mt-5">
         {m.speciality && <p className="text-sm text-[#f3eee5]/50">{m.speciality}</p>}
@@ -349,14 +382,9 @@ function MasterCard({ m, index }: { m: Master; index: number }) {
 
 function WorkCard({ work, index }: { work: Work; index: number }) {
   return (
-    <div className="group relative min-w-[78vw] snap-start overflow-hidden bg-[#f3eee5]/8 sm:min-w-[390px] lg:min-w-[440px]" style={{ transitionDelay: `${Math.min(index * 45, 180)}ms` }}>
+    <div className="group relative min-w-[78vw] snap-center overflow-hidden bg-[#f3eee5]/8 sm:min-w-[390px] lg:min-w-[440px]" style={{ transitionDelay: `${Math.min(index * 45, 180)}ms` }}>
       <div className="aspect-[4/5] overflow-hidden">
-        <MediaFrame src={work.image_url} fallback={WORK_FALLBACKS[index % WORK_FALLBACKS.length]} alt={work.title} className="h-full w-full object-cover grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0" />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-[#171411]/88 via-[#171411]/10 to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 p-5">
-        <h3 className="text-2xl font-extrabold tracking-[-0.025em] text-[#f3eee5]">{work.title}</h3>
-        {work.description && <p className="mt-2 max-w-sm text-sm leading-6 text-[#f3eee5]/70">{work.description}</p>}
+        <MediaFrame src={work.image_url} fallback={WORK_FALLBACKS[index % WORK_FALLBACKS.length]} alt={work.title || "Работа барбершопа"} className="h-full w-full object-cover object-center grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0" />
       </div>
     </div>
   );

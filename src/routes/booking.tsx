@@ -18,6 +18,7 @@ export const Route = createFileRoute("/booking")({
 type Service = { id: string; name: string; price: number; duration: number; image_url: string | null };
 type Master = { id: string; name: string; speciality: string | null; photo_url: string | null };
 type BookingSlot = { booking_date: string; booking_time: string; master_id: string | null };
+type Settings = { shop_name: string | null; logo_url: string | null };
 
 const ANY_MASTER: Master = { id: "any", name: "Любой мастер", speciality: "Первый освободившийся", photo_url: null };
 const SLOTS = Array.from({ length: 20 }, (_, i) => {
@@ -50,6 +51,7 @@ function BookingPage() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
   const [masters, setMasters] = useState<Master[]>([]);
+  const [settings, setSettings] = useState<Settings | null>(null);
   const [month, setMonth] = useState(() => { const d = new Date(); d.setDate(1); return d; });
   const [monthBookings, setMonthBookings] = useState<BookingSlot[]>([]);
 
@@ -66,9 +68,10 @@ function BookingPage() {
   useEffect(() => {
     void cleanupPastBookings();
     (async () => {
-      const [s, m] = await Promise.all([
+      const [s, m, cfg] = await Promise.all([
         supabase.from("services").select("id,name,price,duration,image_url").eq("is_active", true).order("sort_order"),
         supabase.from("masters").select("id,name,speciality,photo_url").eq("is_active", true),
+        supabase.from("shop_settings").select("shop_name,logo_url").limit(1).maybeSingle(),
       ]);
       if (s.data) {
         setServices(s.data as Service[]);
@@ -78,8 +81,29 @@ function BookingPage() {
         }
       }
       if (m.data) setMasters([ANY_MASTER, ...(m.data as Master[])]);
+      if (cfg.data) setSettings(cfg.data as Settings);
     })();
   }, [search.service]);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadSettings() {
+      const { data } = await supabase.from("shop_settings").select("shop_name,logo_url").limit(1).maybeSingle();
+      if (alive && data) setSettings(data as Settings);
+    }
+
+    const channel = supabase.channel("booking-shop-settings")
+      .on("postgres_changes", { event: "*", schema: "public", table: "shop_settings" }, () => { void loadSettings(); })
+      .subscribe();
+    window.addEventListener("focus", loadSettings);
+
+    return () => {
+      alive = false;
+      window.removeEventListener("focus", loadSettings);
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     const { start, end } = monthBounds(month);
@@ -124,6 +148,8 @@ function BookingPage() {
       });
     return SLOTS.filter((slot) => (counts.get(slot) || 0) >= (master?.id === "any" ? activeMasterCount : 1));
   }, [activeMasterCount, date, master?.id, monthBookings]);
+  const shopName = settings?.shop_name || "BLADE & STYLE";
+  const logoUrl = settings?.logo_url || "";
 
   useEffect(() => {
     if (time && busyTimes.includes(time)) setTime(null);
@@ -189,7 +215,7 @@ function BookingPage() {
 
   return (
     <div className="min-h-screen bg-[#f3eee5] text-[#171411]">
-      <SiteHeader />
+      <SiteHeader shopName={shopName} logoUrl={logoUrl} />
       <div className="px-5 pb-20 pt-32 md:pt-36">
         <div className="mx-auto max-w-6xl">
           <Link to="/" className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/50 hover:text-[#171411]">← На главную</Link>
