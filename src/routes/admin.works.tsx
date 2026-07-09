@@ -43,13 +43,38 @@ function WorksAdmin() {
     return items.reduce((max, item) => Math.max(max, Number(item.sort_order) || 0), 0) + 1;
   }
 
-  async function save(addAnother = false) {
+  async function updateImageUrl(url: string) {
+    const editingId = editing?.id;
+    setEditing((current) => current ? { ...current, image_url: url } : current);
+    setError("");
+
+    if (!editingId) return;
+
+    setSaving(true);
+    const { error: updateError } = await db
+      .from("portfolio_items")
+      .update({ image_url: url || null })
+      .eq("id", editingId)
+      .select("id")
+      .maybeSingle();
+    setSaving(false);
+
+    if (updateError) {
+      setError(updateError.message || "Не удалось заменить фото");
+      return;
+    }
+
+    await load();
+  }
+
+  async function save() {
     if (!editing?.image_url) {
       setError("Сначала загрузите фото");
       return;
     }
     setSaving(true);
     setError("");
+
     const payload = {
       title: editing.title?.trim() || "Фото",
       description: null,
@@ -57,10 +82,10 @@ function WorksAdmin() {
       is_active: editing.is_active ?? true,
       sort_order: Number(editing.sort_order) || 0,
     };
-    const followingSortOrder = Math.max(nextSortOrder(), payload.sort_order + 1);
+
     const result = editing.id
-      ? await db.from("portfolio_items").update(payload).eq("id", editing.id)
-      : await db.from("portfolio_items").insert(payload);
+      ? await db.from("portfolio_items").update(payload).eq("id", editing.id).select("id").maybeSingle()
+      : await db.from("portfolio_items").insert(payload).select("id").maybeSingle();
 
     setSaving(false);
     if (result.error) {
@@ -69,7 +94,7 @@ function WorksAdmin() {
     }
 
     await load();
-    setEditing(addAnother ? { ...EMPTY, sort_order: followingSortOrder } : null);
+    setEditing(null);
   }
 
   async function del(id: string) {
@@ -91,7 +116,7 @@ function WorksAdmin() {
           <h1 className="mt-2 text-4xl font-extrabold tracking-[-0.035em]">Портфолио</h1>
         </div>
         <button onClick={() => { setError(""); setEditing({ ...EMPTY, sort_order: nextSortOrder() }); }} className="rounded-full bg-[#171411] px-6 py-3 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black">
-          + Добавить работу
+          + Добавить фото
         </button>
       </div>
 
@@ -104,7 +129,7 @@ function WorksAdmin() {
               ) : <div className="flex h-full items-center justify-center text-sm text-[#171411]/45">Нет фото</div>}
             </div>
             <div className="mt-5 flex flex-wrap gap-2">
-              <button onClick={() => setEditing(item)} className="flex-1 border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">Редакт.</button>
+              <button onClick={() => { setError(""); setEditing(item); }} className="flex-1 border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">Редакт.</button>
               <button onClick={() => toggle(item)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-[#171411]">{item.is_active ? "Скрыть" : "Вкл"}</button>
               <button onClick={() => del(item.id)} className="border border-[#171411]/15 px-3 py-2 text-xs font-extrabold uppercase tracking-[0.14em] hover:border-destructive hover:text-destructive">Удал.</button>
             </div>
@@ -114,17 +139,16 @@ function WorksAdmin() {
 
       {editing && (
         <Modal onClose={() => setEditing(null)}>
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">{editing.id ? "Редактирование" : "Новая работа"}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">{editing.id ? "Редактирование" : "Новое фото"}</div>
           <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.03em]">Фото</h2>
           <div className="mt-6 space-y-5">
-            <MediaUpload label="Фото" value={editing.image_url || ""} onChange={v => setEditing({ ...editing, image_url: v })} accept="image/*" />
+            <MediaUpload label="Фото" value={editing.image_url || ""} onChange={updateImageUrl} accept="image/*" />
             <Input label="Порядок" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />
           </div>
           {error && <div className="mt-4 text-sm font-semibold text-destructive">{error}</div>}
           <div className="mt-8 flex justify-end gap-3">
             <button onClick={() => setEditing(null)} className="px-5 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411]/50 hover:text-[#171411]">Отмена</button>
-            <button onClick={() => save(true)} disabled={saving} className="rounded-full border border-[#171411]/20 px-6 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#171411] hover:border-[#171411] disabled:opacity-50">Сохранить и ещё</button>
-            <button onClick={() => save()} disabled={saving} className="rounded-full bg-[#171411] px-6 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black disabled:opacity-50">{saving ? "Сохранение..." : "Сохранить"}</button>
+            <button onClick={save} disabled={saving} className="rounded-full bg-[#171411] px-6 py-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#f3eee5] hover:bg-black disabled:opacity-50">{saving ? "Сохранение..." : "Сохранить"}</button>
           </div>
         </Modal>
       )}
