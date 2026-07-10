@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { DEFAULT_SHOP_NAME } from "@/lib/brand";
+import { normalizeWorkingHours } from "@/lib/schedule";
 import { formatPrice, formatDuration } from "@/lib/format";
 import { useReveal } from "@/hooks/useReveal";
 
@@ -284,7 +285,7 @@ function Landing() {
                   <div className="text-[10px] font-bold tracking-[0.25em] text-[#171411]/42">ТЕЛЕФОН</div>
                   <a href={`tel:${settings?.phone}`} className="mt-1 block text-[#171411]/90 hover:text-black">{settings?.phone}</a>
                 </div>
-                <Info label="ЧАСЫ РАБОТЫ" value={settings?.working_hours} />
+                <Info label="ЧАСЫ РАБОТЫ" value={normalizeWorkingHours(settings?.working_hours)} />
                 <Info label="INSTAGRAM" value={settings?.instagram} />
               </div>
             </div>

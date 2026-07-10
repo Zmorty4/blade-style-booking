@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MediaUpload } from "@/components/admin/MediaUpload";
+import { DEFAULT_WORKING_HOURS, normalizeWorkingHours } from "@/lib/schedule";
 import { Input } from "./admin.services";
 
 export const Route = createFileRoute("/admin/settings")({
@@ -12,7 +13,7 @@ type S = {
   id?: string; shop_name: string; tagline: string; phone: string; address: string;
   working_hours: string; instagram: string; hero_image_url: string; logo_url: string;
 };
-const EMPTY: S = { shop_name: "", tagline: "", phone: "", address: "", working_hours: "", instagram: "", hero_image_url: "", logo_url: "" };
+const EMPTY: S = { shop_name: "", tagline: "", phone: "", address: "", working_hours: DEFAULT_WORKING_HOURS, instagram: "", hero_image_url: "", logo_url: "" };
 
 function SettingsAdmin() {
   const [form, setForm] = useState<S>(EMPTY);
@@ -22,7 +23,11 @@ function SettingsAdmin() {
 
   useEffect(() => {
     supabase.from("shop_settings").select("*").limit(1).maybeSingle().then(({ data }) => {
-      if (data) setForm({ ...EMPTY, ...(data as any) });
+      if (data) {
+        const next = { ...EMPTY, ...(data as any) };
+        next.working_hours = normalizeWorkingHours(next.working_hours);
+        setForm(next);
+      }
     });
   }, []);
 

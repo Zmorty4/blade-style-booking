@@ -22,10 +22,11 @@ type BookingSlot = { booking_date: string; booking_time: string; master_id: stri
 type Settings = { shop_name: string | null; logo_url: string | null };
 
 const ANY_MASTER: Master = { id: "any", name: "Любой мастер", speciality: "Первый освободившийся", photo_url: null };
-const SLOTS = Array.from({ length: 20 }, (_, i) => {
-  const hour = 10 + Math.floor(i / 2);
-  const minute = i % 2 === 0 ? "00" : "30";
-  return `${String(hour).padStart(2, "0")}:${minute}`;
+const START_HOUR = 10;
+const END_HOUR = 21;
+const SLOTS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => {
+  const hour = START_HOUR + i;
+  return `${String(hour).padStart(2, "0")}:00`;
 });
 
 function dateKey(d: Date) {
@@ -388,9 +389,8 @@ function CalendarPicker({ value, month, unavailableDates, onMonthChange, onChang
           if (!d) return <div key={i} />;
           const key = dateKey(d);
           const past = d < today;
-          const sunday = d.getDay() === 0;
           const fullyBooked = unavailableDates.includes(key);
-          const disabled = past || sunday || fullyBooked;
+          const disabled = past || fullyBooked;
           const selected = value && d.toDateString() === value.toDateString();
           return (
             <button key={i} disabled={disabled} onClick={() => onChange(d)} title={fullyBooked ? "Все часы заняты" : undefined}
