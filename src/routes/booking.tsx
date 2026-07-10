@@ -23,8 +23,8 @@ type Settings = { shop_name: string | null; logo_url: string | null };
 
 const ANY_MASTER: Master = { id: "any", name: "Любой мастер", speciality: "Первый освободившийся", photo_url: null };
 const START_HOUR = 10;
-const END_HOUR = 21;
-const SLOTS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => {
+const LAST_BOOKING_HOUR = 20;
+const SLOTS = Array.from({ length: LAST_BOOKING_HOUR - START_HOUR + 1 }, (_, i) => {
   const hour = START_HOUR + i;
   return `${String(hour).padStart(2, "0")}:00`;
 });
