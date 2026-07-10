@@ -103,7 +103,7 @@ function ServicesAdmin() {
             <Input label="Название" value={editing.name || ""} onChange={v => setEditing({ ...editing, name: v })} />
             <Input label="Описание" value={editing.description || ""} onChange={v => setEditing({ ...editing, description: v })} textarea />
             <div className="grid grid-cols-2 gap-4">
-              <Input label="Цена, ₽" type="number" value={String(editing.price ?? "")} onChange={v => setEditing({ ...editing, price: Number(v) })} />
+              <Input label="Цена, ₸" type="number" value={String(editing.price ?? "")} onChange={v => setEditing({ ...editing, price: Number(v) })} />
               <Input label="Длит., мин" type="number" value={String(editing.duration ?? "")} onChange={v => setEditing({ ...editing, duration: Number(v) })} />
             </div>
             <Input label="Порядок" type="number" value={String(editing.sort_order ?? 0)} onChange={v => setEditing({ ...editing, sort_order: Number(v) })} />

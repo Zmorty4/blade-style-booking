@@ -385,21 +385,21 @@ function CarouselControls({ onPrev, onNext }: { onPrev: () => void; onNext: () =
 
 function ServiceCard({ s, index }: { s: Service; index: number }) {
   return (
-    <Link to="/booking" search={{ service: s.id }} className="group flex min-h-44 flex-col justify-between border border-[#171411]/12 bg-white/35 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 hover:bg-white/75" style={{ transitionDelay: `${Math.min(index * 35, 160)}ms` }}>
+    <Link to="/booking" search={{ service: s.id }} className="group flex min-h-36 flex-col justify-between border border-[#171411]/12 bg-white/35 p-4 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 hover:bg-white/75" style={{ transitionDelay: `${Math.min(index * 35, 160)}ms` }}>
       <div>
-        <h3 className="text-2xl font-extrabold leading-tight tracking-[-0.025em] text-[#171411]">{s.name}</h3>
-        {s.description && <p className="mt-3 line-clamp-2 text-sm leading-6 text-[#171411]/56">{s.description}</p>}
+        <h3 className="text-xl font-extrabold leading-tight tracking-[-0.025em] text-[#171411]">{s.name}</h3>
+        {s.description && <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#171411]/56">{s.description}</p>}
       </div>
-      <div className="mt-7 flex items-end justify-between gap-4 border-t border-[#171411]/10 pt-4">
+      <div className="mt-5 flex items-end justify-between gap-3 border-t border-[#171411]/10 pt-3">
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#171411]/38">Длительность</div>
-          <div className="mt-1 font-bold text-[#171411]/82">{formatDuration(s.duration)}</div>
+          <div className="mt-1 text-sm font-bold text-[#171411]/82">{formatDuration(s.duration)}</div>
         </div>
         <div className="text-right">
           <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#171411]/38">Цена</div>
-          <div className="mt-1 text-2xl font-extrabold text-[#171411]">{formatPrice(s.price)}</div>
+          <div className="mt-1 text-xl font-extrabold text-[#171411]">{formatPrice(s.price)}</div>
         </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#171411]/20 text-[#171411] transition-all group-hover:translate-x-1 group-hover:bg-[#171411] group-hover:text-[#f3eee5]">→</div>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#171411]/20 text-[#171411] transition-all group-hover:translate-x-1 group-hover:bg-[#171411] group-hover:text-[#f3eee5]">→</div>
       </div>
     </Link>
   );

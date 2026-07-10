@@ -1,4 +1,4 @@
-export const formatPrice = (n: number) => `${n.toLocaleString("ru-RU")} ₽`;
+export const formatPrice = (n: number) => `${n.toLocaleString("ru-RU")} ₸`;
 export const formatDuration = (m: number) => {
   if (m < 60) return `${m} мин`;
   const h = Math.floor(m / 60);
