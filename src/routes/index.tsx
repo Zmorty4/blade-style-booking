@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Instagram, MapPin, Phone } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { DEFAULT_SHOP_NAME } from "@/lib/brand";
+import { ADDRESS_MAP_URL, instagramHref, normalizeAddress, phoneHref } from "@/lib/contact";
 import { normalizeWorkingHours } from "@/lib/schedule";
 import { formatPrice, formatDuration } from "@/lib/format";
 import { useReveal } from "@/hooks/useReveal";
@@ -280,13 +282,10 @@ function Landing() {
               <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">Контакты</div>
               <h2 className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.02] tracking-[-0.035em] text-[#171411] md:text-6xl">Приходите за свежей формой.</h2>
               <div className="mt-8 grid gap-4 text-sm sm:grid-cols-2">
-                <Info label="АДРЕС" value={settings?.address} />
-                <div>
-                  <div className="text-[10px] font-bold tracking-[0.25em] text-[#171411]/42">ТЕЛЕФОН</div>
-                  <a href={`tel:${settings?.phone}`} className="mt-1 block text-[#171411]/90 hover:text-black">{settings?.phone}</a>
-                </div>
+                <ContactItem icon={<MapPin className="h-4 w-4" />} label="АДРЕС" value={normalizeAddress(settings?.address)} href={ADDRESS_MAP_URL} external />
+                <ContactItem icon={<Phone className="h-4 w-4" />} label="ТЕЛЕФОН" value={settings?.phone} href={phoneHref(settings?.phone)} />
                 <Info label="ЧАСЫ РАБОТЫ" value={normalizeWorkingHours(settings?.working_hours)} />
-                <Info label="INSTAGRAM" value={settings?.instagram} />
+                <ContactItem icon={<Instagram className="h-4 w-4" />} label="INSTAGRAM" value={settings?.instagram} href={instagramHref(settings?.instagram)} external />
               </div>
             </div>
             <div className="flex flex-col items-start gap-5 md:items-end md:text-right">
@@ -309,6 +308,26 @@ function Info({ label, value }: { label: string; value?: string | null }) {
     <div>
       <div className="text-[10px] font-bold tracking-[0.25em] text-[#171411]/42">{label}</div>
       <div className="mt-1 text-[#171411]/90">{value || "—"}</div>
+    </div>
+  );
+}
+
+function ContactItem({ icon, label, value, href, external = false }: { icon: ReactNode; label: string; value?: string | null; href: string; external?: boolean }) {
+  const content = (
+    <span className="mt-1 flex items-center gap-2 text-[#171411]/90 hover:text-black">
+      <span className="text-[#171411]/45">{icon}</span>
+      <span>{value || "—"}</span>
+    </span>
+  );
+
+  return (
+    <div>
+      <div className="text-[10px] font-bold tracking-[0.25em] text-[#171411]/42">{label}</div>
+      {href && value ? (
+        <a href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined}>
+          {content}
+        </a>
+      ) : content}
     </div>
   );
 }

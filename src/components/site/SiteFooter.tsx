@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { Instagram, MapPin, Phone } from "lucide-react";
 import { DEFAULT_SHOP_NAME } from "@/lib/brand";
+import { ADDRESS_MAP_URL, instagramHref, normalizeAddress, phoneHref } from "@/lib/contact";
 
 export function SiteFooter({
   shopName = DEFAULT_SHOP_NAME,
@@ -7,6 +9,10 @@ export function SiteFooter({
   address = "",
   instagram = "",
 }: { shopName?: string; phone?: string; address?: string; instagram?: string }) {
+  const displayAddress = normalizeAddress(address);
+  const phoneLink = phoneHref(phone);
+  const instagramLink = instagramHref(instagram);
+
   return (
     <footer className="border-t border-[#f3eee5]/10 bg-[#171411] text-[#f3eee5]">
       <div className="mx-auto max-w-7xl px-5 py-14 md:py-16">
@@ -28,10 +34,23 @@ export function SiteFooter({
           </div>
           <div>
             <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#f3eee5]/42">Контакты</div>
-            <div className="mt-4 flex flex-col gap-2 text-sm text-[#f3eee5]/75">
-              {address && <span>{address}</span>}
-              {phone && <a href={`tel:${phone}`} className="hover:text-[#f3eee5]">{phone}</a>}
-              {instagram && <a href={`https://instagram.com/${instagram.replace("@","")}`} target="_blank" rel="noreferrer" className="hover:text-[#f3eee5]">{instagram}</a>}
+            <div className="mt-4 flex flex-col gap-3 text-sm text-[#f3eee5]/75">
+              <a href={ADDRESS_MAP_URL} target="_blank" rel="noreferrer" className="flex items-start gap-2 hover:text-[#f3eee5]">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{displayAddress}</span>
+              </a>
+              {phone && (
+                <a href={phoneLink} className="flex items-center gap-2 hover:text-[#f3eee5]">
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <span>{phone}</span>
+                </a>
+              )}
+              {instagram && (
+                <a href={instagramLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-[#f3eee5]">
+                  <Instagram className="h-4 w-4 shrink-0" />
+                  <span>{instagram}</span>
+                </a>
+              )}
             </div>
           </div>
           <div>
