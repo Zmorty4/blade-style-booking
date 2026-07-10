@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { DEFAULT_SHOP_NAME } from "@/lib/brand";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -13,7 +14,7 @@ type AdminBrandSettings = {
   logo_url: string | null;
 };
 
-const DEFAULT_BRAND: AdminBrandSettings = { shop_name: "BLADE & STYLE", logo_url: "" };
+const DEFAULT_BRAND: AdminBrandSettings = { shop_name: DEFAULT_SHOP_NAME, logo_url: "" };
 
 function AdminLayout() {
   const [session, setSession] = useState<Session | null>(null);
@@ -51,7 +52,7 @@ function LoginScreen() {
     if (error) setErr("Неверный email или пароль");
   }
 
-  const brandName = brand.shop_name || "BLADE & STYLE";
+  const brandName = brand.shop_name || DEFAULT_SHOP_NAME;
   const logoUrl = brand.logo_url || "";
 
   return (
@@ -150,7 +151,7 @@ function AdminShell() {
     setMenuOpen(false);
   }, [pathname, navigate]);
 
-  const brandName = brand.shop_name || "BLADE & STYLE";
+  const brandName = brand.shop_name || DEFAULT_SHOP_NAME;
   const logoUrl = brand.logo_url || "";
 
   const brandLink = (

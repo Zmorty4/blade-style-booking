@@ -4,6 +4,7 @@ import type { ReactNode, RefObject } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { DEFAULT_SHOP_NAME } from "@/lib/brand";
 import { formatPrice, formatDuration } from "@/lib/format";
 import { useReveal } from "@/hooks/useReveal";
 
@@ -147,7 +148,7 @@ function Landing() {
     };
   }, []);
 
-  const shopName = settings?.shop_name || "BLADE & STYLE";
+  const shopName = settings?.shop_name || DEFAULT_SHOP_NAME;
   const tagline = settings?.tagline || "Твой стиль — наше мастерство";
   const heroMedia = settings?.hero_image_url || HERO_FALLBACK;
   const logoUrl = settings?.logo_url || "";
@@ -188,7 +189,7 @@ function Landing() {
 
           <div className="relative animate-hero-rise [animation-delay:120ms]">
             <div className="aspect-[4/5] overflow-hidden bg-[#171411]">
-              <MediaFrame src={heroMedia} fallback={HERO_FALLBACK} alt="BLADE & STYLE" className="h-full w-full object-cover grayscale motion-safe:animate-ken-burns" />
+              <MediaFrame src={heroMedia} fallback={HERO_FALLBACK} alt={shopName} className="h-full w-full object-cover grayscale motion-safe:animate-ken-burns" />
             </div>
             <Link to="/booking" className="absolute -bottom-5 left-5 rounded-full bg-white px-6 py-4 text-sm font-extrabold text-[#171411] shadow-2xl hover:bg-[#171411] hover:text-white">
               Записаться →
@@ -213,7 +214,7 @@ function Landing() {
         id="masters"
         label="Наша команда"
         title="Мастера, которым доверяют форму."
-        subtitle="Листай фото стрелками влево и вправо."
+        subtitle=""
         railRef={mastersRef}
       >
         {masters.map((m, i) => <MasterCard key={m.id} m={m} index={i} />)}
@@ -255,7 +256,7 @@ function Landing() {
         </div>
       </section>
 
-      <Section label="Отзывы" title="Клиенты возвращаются" subtitle="Коротко о том, почему выбирают BLADE & STYLE.">
+      <Section label="Отзывы" title="Клиенты возвращаются" subtitle={`Коротко о том, почему выбирают ${shopName}.`}>
         <div className="grid gap-4 md:grid-cols-3">
           {[
             { name: "Артём", text: "Хожу второй год. Атмосфера спокойная, мастер слышит задачу, фейд всегда чистый." },

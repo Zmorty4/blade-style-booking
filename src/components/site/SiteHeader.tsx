@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { DEFAULT_SHOP_NAME } from "@/lib/brand";
 
-export function SiteHeader({ shopName = "BLADE & STYLE", logoUrl = "" }: { shopName?: string; logoUrl?: string }) {
+export function SiteHeader({ shopName = DEFAULT_SHOP_NAME, logoUrl = "" }: { shopName?: string; logoUrl?: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 

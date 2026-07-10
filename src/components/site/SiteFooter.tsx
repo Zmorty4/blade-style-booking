@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
+import { DEFAULT_SHOP_NAME } from "@/lib/brand";
 
 export function SiteFooter({
-  shopName = "BLADE & STYLE",
+  shopName = DEFAULT_SHOP_NAME,
   phone = "",
   address = "",
   instagram = "",

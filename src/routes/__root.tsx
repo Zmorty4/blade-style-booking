@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { DEFAULT_SHOP_NAME } from "../lib/brand";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -68,9 +69,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BLADE & STYLE — Барбершоп премиум-класса · Онлайн-запись" },
-      { name: "description", content: "Мужской барбершоп BLADE & STYLE. Классические стрижки, оформление бороды, королевское бритьё. Онлайн-запись за минуту." },
-      { property: "og:title", content: "BLADE & STYLE — Барбершоп" },
+      { title: `${DEFAULT_SHOP_NAME} — Барбершоп премиум-класса · Онлайн-запись` },
+      { name: "description", content: `Мужской барбершоп ${DEFAULT_SHOP_NAME}. Классические стрижки, оформление бороды, королевское бритьё. Онлайн-запись за минуту.` },
+      { property: "og:title", content: `${DEFAULT_SHOP_NAME} — Барбершоп` },
       { property: "og:description", content: "Твой стиль — наше мастерство. Онлайн-запись 24/7." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
