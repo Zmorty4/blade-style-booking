@@ -26,7 +26,7 @@ function AdminLayout() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  if (!ready) return <div className="min-h-screen bg-[#f3eee5]" />;
+  if (!ready) return <div className="min-h-screen bg-white" />;
   if (!session) return <LoginScreen />;
   return <AdminShell />;
 }
@@ -56,7 +56,7 @@ function LoginScreen() {
   const logoUrl = brand.logo_url || "";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f3eee5] px-5 text-[#171411]">
+    <div className="flex min-h-screen items-center justify-center bg-white px-5 text-[#171411]">
       <form onSubmit={submit} className="w-full max-w-sm border border-[#171411]/12 bg-white/45 p-7 shadow-sm">
         <Link to="/" className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/50 hover:text-[#171411]">← На сайт</Link>
         <div className="mt-7 flex items-center gap-3">
@@ -189,8 +189,8 @@ function AdminShell() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f3eee5] text-[#171411] lg:flex">
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[#171411]/10 bg-[#f3eee5]/90 px-4 py-4 backdrop-blur lg:hidden">
+    <div className="min-h-screen bg-white text-[#171411] lg:flex">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[#171411]/10 bg-white/90 px-4 py-4 backdrop-blur lg:hidden">
         <div className="flex min-w-0 items-center gap-3">
           {logoUrl && <img src={logoUrl} alt={`${brandName} logo`} className="h-10 w-10 shrink-0 rounded-full border border-[#171411]/12 object-cover" />}
           <div className="min-w-0">
@@ -209,7 +209,7 @@ function AdminShell() {
 
       {menuOpen && <button className="fixed inset-0 z-40 bg-[#171411]/50 lg:hidden" onClick={() => setMenuOpen(false)} aria-label="Закрыть меню" />}
 
-      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-72 max-w-[86vw] flex-col border-r border-[#171411]/10 bg-[#f3eee5] p-6 transition-transform duration-300 lg:sticky lg:z-auto lg:w-64 lg:translate-x-0 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed left-0 top-0 z-50 flex h-screen w-72 max-w-[86vw] flex-col border-r border-[#171411]/10 bg-white p-6 transition-transform duration-300 lg:sticky lg:z-auto lg:w-64 lg:translate-x-0 ${menuOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {nav}
       </aside>
 

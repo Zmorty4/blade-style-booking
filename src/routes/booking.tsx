@@ -216,7 +216,7 @@ function BookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f3eee5] text-[#171411]">
+    <div className="min-h-screen bg-white text-[#171411]">
       <SiteHeader shopName={shopName} logoUrl={logoUrl} />
       <div className="px-5 pb-20 pt-32 md:pt-36">
         <div className="mx-auto max-w-6xl">

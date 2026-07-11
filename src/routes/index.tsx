@@ -163,48 +163,44 @@ function Landing() {
     <div className="min-h-screen bg-white text-[#171411]">
       <SiteHeader shopName={shopName} logoUrl={logoUrl} />
 
-      <section className="relative isolate overflow-hidden bg-[#111] px-5 pb-16 pt-32 text-white md:min-h-[760px] md:pb-24 md:pt-36">
-        <div className="absolute inset-0 -z-20">
-          <MediaFrame src={heroMedia} fallback={HERO_FALLBACK} alt={shopName} className="h-full w-full object-cover grayscale" />
-        </div>
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/35 via-black/55 to-black/78" />
+      <section className="relative isolate overflow-hidden bg-white px-5 pb-16 pt-32 text-[#171411] md:min-h-[720px] md:pb-24 md:pt-36">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
           <div className="animate-hero-rise pt-8 md:pt-16">
-            <div className="inline-flex rounded-full border border-white/30 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white/78 backdrop-blur">
+            <div className="inline-flex rounded-full border border-[#171411]/18 bg-[#f8f8f8] px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#171411]/65">
               Барбершоп премиум-класса
             </div>
-            <h1 className="mt-7 max-w-4xl font-sans text-[48px] font-extrabold leading-[0.95] tracking-[-0.04em] text-white sm:text-[66px] lg:text-[88px]">
-              Zaman Barbershop в Актобе.
+            <h1 className="mt-7 max-w-4xl font-sans text-[48px] font-extrabold leading-[0.95] tracking-[-0.04em] text-[#171411] sm:text-[66px] lg:text-[88px]">
+              Zaman Barbershop.
             </h1>
-            <p className="mt-7 max-w-2xl text-base leading-8 text-white/76 md:text-lg">
-              {tagline}. Проспект Алии Молдагуловой, 47. Запишитесь онлайн и приходите в удобное время.
+            <p className="mt-7 max-w-2xl text-base leading-8 text-[#171411]/68 md:text-lg">
+              {tagline}. Запишитесь онлайн и приходите в удобное время.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Link to="/booking" className="rounded-full bg-white px-7 py-4 text-sm font-extrabold text-[#171411] hover:bg-[#f3eee5]">
+              <Link to="/booking" className="rounded-full bg-[#171411] px-7 py-4 text-sm font-extrabold text-white hover:bg-black">
                 Записаться сейчас
               </Link>
-              <a href="#works" className="rounded-full border border-white/40 px-7 py-4 text-sm font-extrabold text-white hover:border-white hover:bg-white hover:text-[#171411]">
+              <a href="#works" className="rounded-full border border-[#171411]/25 px-7 py-4 text-sm font-extrabold text-[#171411] hover:border-[#171411] hover:bg-[#171411] hover:text-white">
                 Смотреть работы
               </a>
             </div>
-            <div className="mt-12 grid max-w-2xl grid-cols-3 gap-3 border-y border-white/18 py-5">
+            <div className="mt-12 grid max-w-2xl grid-cols-3 gap-3 border-y border-[#171411]/12 py-5">
               {[["4.8", "рейтинг 2GIS"], ["3000 ₸", "стрижка от"], ["10:00–20:00", "ежедневно"]].map(([n, l]) => (
                 <div key={l}>
                   <div className="text-2xl font-extrabold tracking-[-0.03em] sm:text-3xl">{n}</div>
-                  <div className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-white/48">{l}</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-[#171411]/45">{l}</div>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="relative animate-hero-rise [animation-delay:120ms]">
-            <div className="aspect-[4/5] overflow-hidden border border-white/18 bg-white/10 shadow-2xl backdrop-blur-sm">
+            <div className="aspect-[4/5] overflow-hidden border border-[#171411]/12 bg-[#f8f8f8] shadow-2xl">
               <MediaFrame src={heroMedia} fallback={HERO_FALLBACK} alt={shopName} className="h-full w-full object-cover grayscale motion-safe:animate-ken-burns" />
             </div>
-            <Link to="/booking" className="absolute -bottom-5 left-5 rounded-full bg-white px-6 py-4 text-sm font-extrabold text-[#171411] shadow-2xl hover:bg-[#171411] hover:text-white">
+            <Link to="/booking" className="absolute -bottom-5 left-5 rounded-full bg-[#171411] px-6 py-4 text-sm font-extrabold text-white shadow-2xl hover:bg-black">
               Записаться →
             </Link>
-            <div className="absolute -right-3 top-8 hidden max-w-[190px] border border-white/45 bg-black/55 p-4 text-sm font-semibold leading-6 text-white shadow-xl backdrop-blur sm:block">
+            <div className="absolute -right-3 top-8 hidden max-w-[190px] border border-[#171411]/12 bg-white p-4 text-sm font-semibold leading-6 text-[#171411] shadow-xl sm:block">
               Чистая работа. Спокойная атмосфера. Точный результат.
             </div>
           </div>
@@ -246,21 +242,21 @@ function Landing() {
             <div key={n} className="group relative border border-[#171411]/12 bg-[#f8f8f8] p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#171411]/35 hover:bg-white hover:shadow-sm">
               <div className="text-4xl font-extrabold tracking-[-0.03em] text-[#171411]">{n}</div>
               <div className="mt-10 text-xl font-extrabold text-[#171411]">{t}</div>
-              {i < 3 && <div className="absolute -right-5 top-8 hidden h-10 w-10 items-center justify-center rounded-full border border-[#171411]/25 bg-[#f3eee5] text-[#171411] transition-transform group-hover:translate-x-2 md:flex">→</div>}
+              {i < 3 && <div className="absolute -right-5 top-8 hidden h-10 w-10 items-center justify-center rounded-full border border-[#171411]/25 bg-white text-[#171411] transition-transform group-hover:translate-x-2 md:flex">→</div>}
             </div>
           ))}
         </div>
       </Section>
 
-      <section className="bg-[#171411] px-5 py-20 text-[#f3eee5] md:py-28">
+      <section className="border-y border-[#171411]/10 bg-white px-5 py-20 text-[#171411] md:py-28">
         <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[0.9fr_1.1fr] md:items-end">
           <div>
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#f3eee5]/50">О нас</div>
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">О нас</div>
             <h2 className="mt-5 max-w-2xl text-4xl font-extrabold leading-[1.02] tracking-[-0.035em] md:text-6xl">
               Не просто стрижка, а спокойная точная работа.
             </h2>
           </div>
-          <p className="max-w-xl text-base leading-8 text-[#f3eee5]/68">
+          <p className="max-w-xl text-base leading-8 text-[#171411]/68">
             Здесь ценят аккуратность, спокойную атмосферу и результат, который держит форму после выхода из кресла. Мастера внимательно слушают пожелания, подбирают стрижку под стиль клиента и доводят детали до чистого, уверенного вида.
           </p>
         </div>
@@ -348,7 +344,7 @@ function scrollRail(ref: RailRef, direction: -1 | 1) {
 function Marquee({ words }: { words: string[] }) {
   const repeated = [...words, ...words, ...words];
   return (
-    <div className="overflow-hidden border-y border-[#171411]/10 bg-[#171411] py-4 text-[#f3eee5]">
+    <div className="overflow-hidden border-y border-[#171411]/10 bg-white py-4 text-[#171411]">
       <div className="flex w-max animate-marquee gap-8 whitespace-nowrap text-sm font-extrabold uppercase tracking-[0.18em]">
         {repeated.map((word, i) => <span key={`${word}-${i}`}>{word}</span>)}
       </div>
@@ -383,13 +379,13 @@ function SectionHeading({ label, title, subtitle }: { label: string; title: stri
 function PhotoSection({ id, label, title, subtitle, railRef, children }: { id: string; label: string; title: string; subtitle: string; railRef: RailRef; children: ReactNode }) {
   const { ref, visible } = useReveal<HTMLDivElement>();
   return (
-    <section id={id} className="relative bg-[#171411] px-5 py-20 text-[#f3eee5] md:py-28">
+    <section id={id} className="relative border-y border-[#171411]/10 bg-white px-5 py-20 text-[#171411] md:py-28">
       <div ref={ref} className={`mx-auto max-w-7xl fade-in-up ${visible ? "fade-in-up-visible" : ""}`}>
         <div className="mb-10 grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
           <div className="max-w-3xl">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#f3eee5]/50">{label}</div>
-            <h2 className="mt-5 text-4xl font-extrabold leading-[1.02] tracking-[-0.035em] md:text-6xl">{title}</h2>
-            {subtitle && <p className="mt-5 max-w-md text-sm leading-7 text-[#f3eee5]/58">{subtitle}</p>}
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#171411]/45">{label}</div>
+            <h2 className="mt-5 text-4xl font-extrabold leading-[1.02] tracking-[-0.035em] text-[#171411] md:text-6xl">{title}</h2>
+            {subtitle && <p className="mt-5 max-w-md text-sm leading-7 text-[#171411]/58">{subtitle}</p>}
           </div>
           <CarouselControls onPrev={() => scrollRail(railRef, -1)} onNext={() => scrollRail(railRef, 1)} />
         </div>
@@ -404,8 +400,8 @@ function PhotoSection({ id, label, title, subtitle, railRef, children }: { id: s
 function CarouselControls({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
   return (
     <div className="flex items-center gap-3">
-      <button onClick={onPrev} className="flex h-12 w-12 items-center justify-center rounded-full border border-[#f3eee5]/55 text-2xl text-[#f3eee5] hover:bg-[#f3eee5] hover:text-[#171411]" aria-label="Листать влево">←</button>
-      <button onClick={onNext} className="flex h-12 w-12 items-center justify-center rounded-full border border-[#f3eee5]/55 text-2xl text-[#f3eee5] hover:bg-[#f3eee5] hover:text-[#171411]" aria-label="Листать вправо">→</button>
+      <button onClick={onPrev} className="flex h-12 w-12 items-center justify-center rounded-full border border-[#171411]/25 text-2xl text-[#171411] hover:bg-[#171411] hover:text-white" aria-label="Листать влево">←</button>
+      <button onClick={onNext} className="flex h-12 w-12 items-center justify-center rounded-full border border-[#171411]/25 text-2xl text-[#171411] hover:bg-[#171411] hover:text-white" aria-label="Листать вправо">→</button>
     </div>
   );
 }
@@ -435,13 +431,13 @@ function ServiceCard({ s, index }: { s: Service; index: number }) {
 function MasterCard({ m, index }: { m: Master; index: number }) {
   return (
     <div className="group min-w-[78vw] snap-center sm:min-w-[390px] lg:min-w-[440px]" style={{ transitionDelay: `${Math.min(index * 45, 180)}ms` }}>
-      <div className="aspect-[4/5] overflow-hidden bg-[#f3eee5]/8">
+      <div className="aspect-[4/5] overflow-hidden bg-[#f8f8f8]">
         <MediaFrame src={m.photo_url} fallback={MASTER_FALLBACK} alt={m.name} className="h-full w-full object-cover object-center grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0" />
       </div>
       <div className="mt-5">
-        {m.speciality && <p className="text-sm text-[#f3eee5]/50">{m.speciality}</p>}
-        <h3 className="mt-1 text-2xl font-extrabold tracking-[-0.025em] text-[#f3eee5]">{m.name}</h3>
-        {m.experience && <div className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-[#f3eee5]/40">{m.experience}</div>}
+        {m.speciality && <p className="text-sm text-[#171411]/55">{m.speciality}</p>}
+        <h3 className="mt-1 text-2xl font-extrabold tracking-[-0.025em] text-[#171411]">{m.name}</h3>
+        {m.experience && <div className="mt-3 text-xs font-bold uppercase tracking-[0.18em] text-[#171411]/42">{m.experience}</div>}
       </div>
     </div>
   );
@@ -449,7 +445,7 @@ function MasterCard({ m, index }: { m: Master; index: number }) {
 
 function WorkCard({ work, index }: { work: Work; index: number }) {
   return (
-    <div className="group relative min-w-[78vw] snap-center overflow-hidden bg-[#f3eee5]/8 sm:min-w-[390px] lg:min-w-[440px]" style={{ transitionDelay: `${Math.min(index * 45, 180)}ms` }}>
+    <div className="group relative min-w-[78vw] snap-center overflow-hidden bg-[#f8f8f8] sm:min-w-[390px] lg:min-w-[440px]" style={{ transitionDelay: `${Math.min(index * 45, 180)}ms` }}>
       <div className="aspect-[4/5] overflow-hidden">
         <MediaFrame src={work.image_url} fallback={WORK_FALLBACKS[index % WORK_FALLBACKS.length]} alt={work.title || "Работа барбершопа"} className="h-full w-full object-cover object-center grayscale transition-all duration-700 group-hover:scale-105 group-hover:grayscale-0" />
       </div>
