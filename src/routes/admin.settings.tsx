@@ -15,7 +15,7 @@ type S = {
   id?: string; shop_name: string; tagline: string; phone: string; address: string;
   working_hours: string; instagram: string; hero_image_url: string; logo_url: string;
 };
-const EMPTY: S = { shop_name: "Zaman Barbershop", tagline: "", phone: DEFAULT_PHONE, address: DEFAULT_ADDRESS, working_hours: DEFAULT_WORKING_HOURS, instagram: DEFAULT_INSTAGRAM, hero_image_url: "", logo_url: "" };
+const EMPTY: S = { shop_name: "Bro", tagline: "", phone: DEFAULT_PHONE, address: DEFAULT_ADDRESS, working_hours: DEFAULT_WORKING_HOURS, instagram: DEFAULT_INSTAGRAM, hero_image_url: "", logo_url: "" };
 
 function SettingsAdmin() {
   const [form, setForm] = useState<S>(EMPTY);

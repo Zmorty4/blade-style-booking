@@ -20,7 +20,7 @@ export function SiteFooter({
           <div>
             <div className="text-2xl font-extrabold uppercase tracking-[-0.04em]">{shopName}</div>
             <div className="mt-3 max-w-xs text-sm leading-7 text-[#171411]/58">
-              Барбершоп в Актобе: мужские и детские стрижки, бритьё и удобная онлайн-запись.
+              Барбершоп в Уральске: мужские и детские стрижки, бритьё и удобная онлайн-запись.
             </div>
           </div>
           <div>

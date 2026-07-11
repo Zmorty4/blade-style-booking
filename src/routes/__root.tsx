@@ -70,7 +70,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: `${DEFAULT_SHOP_NAME} — Барбершоп премиум-класса · Онлайн-запись` },
-      { name: "description", content: `${DEFAULT_SHOP_NAME} в Актобе. Мужские и детские стрижки, бритьё, Wi-Fi для клиентов и онлайн-запись.` },
+      { name: "description", content: `${DEFAULT_SHOP_NAME} в Уральске. Мужские и детские стрижки, бритьё, Wi-Fi для клиентов и онлайн-запись.` },
       { property: "og:title", content: `${DEFAULT_SHOP_NAME} — Барбершоп` },
       { property: "og:description", content: "Твой стиль — наше мастерство. Онлайн-запись 24/7." },
       { property: "og:type", content: "website" },

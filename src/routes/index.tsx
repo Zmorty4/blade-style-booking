@@ -152,7 +152,7 @@ function Landing() {
   }, []);
 
   const shopName = normalizeShopName(settings?.shop_name);
-  const tagline = settings?.tagline || "Мужские и детские стрижки, бритьё и аккуратная форма каждый день";
+  const tagline = settings?.tagline || "Стрижем и бреем, создавая аккуратный образ без лишней суеты";
   const heroMedia = settings?.hero_image_url || HERO_FALLBACK;
   const logoUrl = settings?.logo_url || "";
   const displayPhone = normalizePhone(settings?.phone);
@@ -170,7 +170,7 @@ function Landing() {
               Барбершоп премиум-класса
             </div>
             <h1 className="mt-7 max-w-4xl font-sans text-[48px] font-extrabold leading-[0.95] tracking-[-0.04em] text-[#171411] sm:text-[66px] lg:text-[88px]">
-              Zaman Barbershop.
+              Bro Barbershop.
             </h1>
             <p className="mt-7 max-w-2xl text-base leading-8 text-[#171411]/68 md:text-lg">
               {tagline}. Запишитесь онлайн и приходите в удобное время.
@@ -184,7 +184,7 @@ function Landing() {
               </a>
             </div>
             <div className="mt-12 grid max-w-2xl grid-cols-3 gap-3 border-y border-[#171411]/12 py-5">
-              {[["4.8", "рейтинг 2GIS"], ["3000 ₸", "стрижка от"], ["10:00–20:00", "ежедневно"]].map(([n, l]) => (
+              {[["4.5", "рейтинг 2GIS"], ["4000 ₸", "стрижка от"], ["10:00–21:00", "ежедневно"]].map(([n, l]) => (
                 <div key={l}>
                   <div className="text-2xl font-extrabold tracking-[-0.03em] sm:text-3xl">{n}</div>
                   <div className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-[#171411]/45">{l}</div>
