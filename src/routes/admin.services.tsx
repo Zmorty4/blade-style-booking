@@ -13,7 +13,7 @@ type S = {
   image_url: string | null; is_active: boolean; sort_order: number;
 };
 
-const EMPTY: Partial<S> = { name: "", description: "", price: 2000, duration: 45, image_url: "", is_active: true, sort_order: 0 };
+const EMPTY: Partial<S> = { name: "", description: "", price: 3000, duration: 45, image_url: "", is_active: true, sort_order: 0 };
 const PORTFOLIO_PREFIX = "[portfolio-work]";
 
 function ServicesAdmin() {

@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MediaUpload } from "@/components/admin/MediaUpload";
+import { normalizeShopName } from "@/lib/brand";
+import { DEFAULT_ADDRESS, DEFAULT_INSTAGRAM, DEFAULT_PHONE, normalizeAddress, normalizeInstagram, normalizePhone } from "@/lib/contact";
 import { DEFAULT_WORKING_HOURS, normalizeWorkingHours } from "@/lib/schedule";
 import { Input } from "./admin.services";
 
@@ -13,7 +15,7 @@ type S = {
   id?: string; shop_name: string; tagline: string; phone: string; address: string;
   working_hours: string; instagram: string; hero_image_url: string; logo_url: string;
 };
-const EMPTY: S = { shop_name: "", tagline: "", phone: "", address: "", working_hours: DEFAULT_WORKING_HOURS, instagram: "", hero_image_url: "", logo_url: "" };
+const EMPTY: S = { shop_name: "Zaman Barbershop", tagline: "", phone: DEFAULT_PHONE, address: DEFAULT_ADDRESS, working_hours: DEFAULT_WORKING_HOURS, instagram: DEFAULT_INSTAGRAM, hero_image_url: "", logo_url: "" };
 
 function SettingsAdmin() {
   const [form, setForm] = useState<S>(EMPTY);
@@ -25,6 +27,10 @@ function SettingsAdmin() {
     supabase.from("shop_settings").select("*").limit(1).maybeSingle().then(({ data }) => {
       if (data) {
         const next = { ...EMPTY, ...(data as any) };
+        next.shop_name = normalizeShopName(next.shop_name);
+        next.address = normalizeAddress(next.address);
+        next.phone = normalizePhone(next.phone);
+        next.instagram = normalizeInstagram(next.instagram);
         next.working_hours = normalizeWorkingHours(next.working_hours);
         setForm(next);
       }

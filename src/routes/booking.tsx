@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { DEFAULT_SHOP_NAME } from "@/lib/brand";
+import { normalizeShopName } from "@/lib/brand";
 import { formatPrice, formatDuration, formatPhone, cleanPhone } from "@/lib/format";
 
 const searchSchema = z.object({
@@ -23,7 +23,7 @@ type Settings = { shop_name: string | null; logo_url: string | null };
 
 const ANY_MASTER: Master = { id: "any", name: "Любой мастер", speciality: "Первый освободившийся", photo_url: null };
 const START_HOUR = 10;
-const LAST_BOOKING_HOUR = 20;
+const LAST_BOOKING_HOUR = 19;
 const SLOTS = Array.from({ length: LAST_BOOKING_HOUR - START_HOUR + 1 }, (_, i) => {
   const hour = START_HOUR + i;
   return `${String(hour).padStart(2, "0")}:00`;
@@ -150,7 +150,7 @@ function BookingPage() {
       });
     return SLOTS.filter((slot) => (counts.get(slot) || 0) >= (master?.id === "any" ? activeMasterCount : 1));
   }, [activeMasterCount, date, master?.id, monthBookings]);
-  const shopName = settings?.shop_name || DEFAULT_SHOP_NAME;
+  const shopName = normalizeShopName(settings?.shop_name);
   const logoUrl = settings?.logo_url || "";
 
   useEffect(() => {

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { DEFAULT_SHOP_NAME } from "@/lib/brand";
+import { DEFAULT_SHOP_NAME, normalizeShopName } from "@/lib/brand";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
@@ -52,7 +52,7 @@ function LoginScreen() {
     if (error) setErr("Неверный email или пароль");
   }
 
-  const brandName = brand.shop_name || DEFAULT_SHOP_NAME;
+  const brandName = normalizeShopName(brand.shop_name);
   const logoUrl = brand.logo_url || "";
 
   return (
@@ -151,7 +151,7 @@ function AdminShell() {
     setMenuOpen(false);
   }, [pathname, navigate]);
 
-  const brandName = brand.shop_name || DEFAULT_SHOP_NAME;
+  const brandName = normalizeShopName(brand.shop_name);
   const logoUrl = brand.logo_url || "";
 
   const brandLink = (

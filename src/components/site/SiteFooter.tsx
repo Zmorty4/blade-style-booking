@@ -20,7 +20,7 @@ export function SiteFooter({
           <div>
             <div className="text-2xl font-extrabold uppercase tracking-[-0.04em]">{shopName}</div>
             <div className="mt-3 max-w-xs text-sm leading-7 text-[#f3eee5]/58">
-              Мужской барбершоп с чистой формой, спокойным сервисом и онлайн-записью.
+              Барбершоп в Актобе: мужские и детские стрижки, бритьё и удобная онлайн-запись.
             </div>
           </div>
           <div>

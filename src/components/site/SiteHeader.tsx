@@ -21,7 +21,7 @@ export function SiteHeader({ shopName = DEFAULT_SHOP_NAME, logoUrl = "" }: { sho
   ];
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || open ? "border-b border-[#171411]/10 bg-[#f3eee5]/90 backdrop-blur-xl" : "bg-transparent"}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 border-b border-[#171411]/10 bg-white/95 backdrop-blur-xl transition-all duration-300 ${scrolled || open ? "shadow-sm" : ""}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
         <Link to="/" className="flex items-center gap-3 leading-none text-[#171411] transition-opacity hover:opacity-70" onClick={() => setOpen(false)}>
           {logoUrl && (
